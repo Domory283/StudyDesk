@@ -106,7 +106,9 @@ export function dueReminders(plans, prefs, courses, now, labels) {
     const body = p.title || (c && !c.deletedAt ? c.name : null) || labels.fallback;
 
     if (lead !== null) {
-      out.push({ key: `${p.id}:lead`, at: at - lead * 60_000, title: labels.soon(lead), body });
+      // v1.19 — SD#137: titled with the start time, not the minutes left, the
+      // same as the Android reminder; one that fires late stays correct.
+      out.push({ key: `${p.id}:lead`, at: at - lead * 60_000, title: labels.soon(at), body });
     }
     if (wantStart) {
       out.push({ key: `${p.id}:start`, at, title: labels.now, body });
