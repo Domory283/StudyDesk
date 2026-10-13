@@ -183,7 +183,7 @@ export default function GradesView({ state, dispatch, showFlash, session }) {
     showFlash(t('gv.archived', { name: semester }));
     // Snapshot the courses map at enqueue time so a queued retry doesn't
     // miss courses added later — the batch is what the user intended now.
-    if (session) outbox.enqueue('archive_semester', { courses: state.courses, semester });
+    if (session) outbox.enqueue('archive_semester', { courses: state.courses, semester, stamp });
   }
   function restoreSem(semester) {
     if (!semester) return;

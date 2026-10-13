@@ -378,6 +378,11 @@ const KIND_RANK = {
 
   upsert_attendance: 2,
   upsert_note_attachment: 2,
+  // v1.18.1 (StudyDesk#143): the one delete that IS ranked. Attendance is a
+  // toggle on one natural key, so its upsert and delete must drain in the
+  // order the user tapped them; at the default rank 1 the delete ran ahead of
+  // an earlier upsert and the server ended up marked after a clear.
+  delete_attendance: 2,
 };
 
 function rankOf(kind) {
@@ -710,7 +715,7 @@ const KIND_DISPATCH = {
   // Semester archive/restore: stored as a single batch op so a retry doesn't
   // re-fire one course per item if the user archived a 6-course semester.
   // `courses` snapshot is captured at enqueue time so the batch is stable.
-  archive_semester: (p) => sync.archiveSemester(p.courses, p.semester),
+  archive_semester: (p) => sync.archiveSemester(p.courses, p.semester, p.stamp),
   restore_semester: (p) => sync.restoreSemester(p.courses, p.semester),
   // v1.10 — planned study blocks, the academic-term tree and the weekly
   // timetable. Same snapshot-not-patch contract as the assignments above.
@@ -734,7 +739,7 @@ const KIND_DISPATCH = {
   delete_commitment: (p) => sync.deleteCommitment(p.id),
   // v1.13 Tier 2 — lesson attendance (#31).
   upsert_attendance: (p) => sync.upsertAttendance(p),
-  delete_attendance: (p) => sync.deleteAttendance(p.id),
+  delete_attendance: (p) => sync.deleteAttendance(p),
   // v1.13 Item 1b — the notebook. A note is queued like any other entity;
   // its ATTACHMENT UPLOAD is not, for the same reason assignment uploads are
   // not — a File cannot survive the JSON round trip this queue is persisted

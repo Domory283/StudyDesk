@@ -11,6 +11,7 @@
 import { supabase } from './supabase.js';
 import { selectAll } from './selectAll.js';
 import { pushStamp, recordPull } from './editStamp.js';
+import { stampNow } from './serverClock.js';
 import { dueTimeToSql } from './dueAt.js';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -21,7 +22,8 @@ async function currentUserId() {
   return user.id;
 }
 
-function nowISO() { return new Date().toISOString(); }
+// v1.18.1 (StudyDesk#144): server time; see serverClock.js.
+function nowISO() { return stampNow(); }
 function todayISO() { return new Date().toISOString().slice(0, 10); }
 
 // ── retention (v1.12 Item 0) ─────────────────────────────────────────────────
@@ -91,24 +93,12 @@ export async function upsertSubject({ id, name, credits, semester, color, archiv
  * confirmation. Caller is responsible for dispatching the corresponding
  * local reducer action first (instant feedback).
  */
-export async function archiveSemester(courses, semester) {
-  const stamp = nowISO();
+export async function archiveSemester(courses, semester, stamp) {
+  const archivedAt = stamp || nowISO();
   const targets = Object.values(courses || {}).filter(
     (c) => !c.deletedAt && !c.archivedAt && c.semester === semester,
   );
-  const results = await Promise.allSettled(
-    targets.map((c) =>
-      upsertSubject({
-        id: c.id,
-        name: c.name,
-        credits: c.credits,
-        semester: c.semester,
-        schoolYear: c.schoolYear,
-        color: c.color,
-        archivedAt: stamp,
-      }),
-    ),
-  );
+  const results = await Promise.allSettled(targets.map((c) => setArchivedAt(c, archivedAt)));
   const failed = results.filter((r) => r.status === 'rejected').length;
   return { archived: targets.length - failed, failed };
 }
@@ -121,21 +111,38 @@ export async function restoreSemester(courses, semester) {
   const targets = Object.values(courses || {}).filter(
     (c) => !c.deletedAt && c.archivedAt && c.semester === semester,
   );
-  const results = await Promise.allSettled(
-    targets.map((c) =>
-      upsertSubject({
-        id: c.id,
-        name: c.name,
-        credits: c.credits,
-        semester: c.semester,
-        schoolYear: c.schoolYear,
-        color: c.color,
-        archivedAt: null,
-      }),
-    ),
-  );
+  const results = await Promise.allSettled(targets.map((c) => setArchivedAt(c, null)));
   const failed = results.filter((r) => r.status === 'rejected').length;
   return { restored: targets.length - failed, failed };
+}
+
+// v1.18.1 (StudyDesk#145): an archive or restore changes ONE column. It used
+// to upsert the whole course from the snapshot taken when the user pressed
+// the button, stamped at push time: archived offline at 10:00, renamed on
+// another device at 11:00, back online at 12:00, and the 10:00 name went up
+// as the newest version and the rename was lost everywhere. Now only
+// archived_at is written, so the other columns keep whatever the server has.
+// The push-time stamp lets the archive itself land over an older row. A
+// course the server has never seen (created offline, its own push still
+// queued or failed) gets the whole row instead.
+async function setArchivedAt(course, archivedAt) {
+  const { data, error } = await supabase
+    .from('subjects')
+    .update({ archived_at: archivedAt, updated_at: pushStamp() })
+    .eq('id', course.id)
+    .select('id');
+  if (error) throw error;
+  if (data && data.length > 0) return course.id;
+  return upsertSubject({
+    id: course.id,
+    name: course.name,
+    credits: course.credits,
+    semester: course.semester,
+    schoolYear: course.schoolYear,
+    color: course.color,
+    archivedAt,
+    updatedAt: course.updatedAt,
+  });
 }
 
 export async function deleteSubject(id) {
@@ -783,11 +790,25 @@ export async function upsertAttendance({ timetableEntryId, date, status, note, u
   if (error) throw error;
 }
 
-export async function deleteAttendance(id) {
-  const { error } = await supabase
-    .from('lesson_attendance')
-    .update({ deleted_at: nowISO(), updated_at: nowISO() })
-    .eq('id', id);
+export async function deleteAttendance({ id, timetableEntryId, date, updatedAt }) {
+  // v1.18.1 (StudyDesk#143). Two things were wrong here:
+  //  - It matched on `id`, but upsertAttendance never sends one (see above):
+  //    the server row keeps the id of whichever device inserted it first. So
+  //    clearing a lesson this device marked matched nothing, reported success,
+  //    and the server stayed marked. Delete by the natural key instead, as the
+  //    upsert writes by it. Items queued by an older build carry only `id`.
+  //  - It was stamped when the drain SENT it, so a mark-clear-mark cycle made
+  //    offline had a delete newer than the final re-mark, and the server
+  //    declined the re-mark. The outbox now stamps the edit (editStamp).
+  const stamp = pushStamp(updatedAt);
+  let q = supabase.from('lesson_attendance').update({ deleted_at: stamp, updated_at: stamp });
+  if (timetableEntryId && date) {
+    const userId = await currentUserId();
+    q = q.eq('user_id', userId).eq('timetable_entry_id', timetableEntryId).eq('date', date);
+  } else {
+    q = q.eq('id', id);
+  }
+  const { error } = await q;
   if (error) throw error;
   return id;
 }

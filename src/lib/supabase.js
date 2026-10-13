@@ -3,6 +3,7 @@ import { Preferences } from '@capacitor/preferences';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 import { DESKTOP_REDIRECT_URL } from './desktop.js';
+import { noteServerDate } from './serverClock.js';
 
 // Supabase backend — overridable at build time via Vite env vars so the app
 // can be re-built against a self-hosted Supabase instance without forking
@@ -44,7 +45,17 @@ const capacitorStorage = {
 
 const isNative = Capacitor.isNativePlatform();
 
+// v1.18.1 (StudyDesk#144): every Supabase response carries the server's
+// `Date` header; serverClock.js turns it into this device's clock offset.
+function fetchNotingServerTime(input, init) {
+  return fetch(input, init).then((res) => {
+    noteServerDate(res.headers?.get?.('date'));
+    return res;
+  });
+}
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  global: { fetch: fetchNotingServerTime },
   auth: {
     storage: isNative ? capacitorStorage : undefined,
     storageKey: 'studydesk-supabase-session',
