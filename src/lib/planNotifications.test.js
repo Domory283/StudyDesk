@@ -8,7 +8,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 // A stand-in for the plugin that keeps what is pending, as Android does: a
 // cancel removes by id, a schedule adds or replaces by id. `getPending` hands
-// back `schedule.at` as an ISO string, as the bridge does.
+// back `schedule.at` as Android does, a java.util.Date's toString() in a zone
+// JS cannot parse, and `extra` unchanged.
 const holder = vi.hoisted(() => ({ scheduled: [], cancelled: [], pending: new Map(), actionLabels: [], gate: null, runs: 0, inFlight: 0, overlapped: false }));
 vi.mock('@capacitor/local-notifications', () => ({
   LocalNotifications: {
@@ -20,7 +21,7 @@ vi.mock('@capacitor/local-notifications', () => ({
       if (holder.inFlight > 1) holder.overlapped = true;
       if (holder.gate) await holder.gate;
       holder.inFlight -= 1;
-      return { notifications: [...holder.pending.values()].map((n) => ({ ...n, schedule: { at: n.schedule.at.toISOString() } })) };
+      return { notifications: [...holder.pending.values()].map((n) => ({ ...n, schedule: { at: 'Thu Oct 15 09:00:00 HST 2026' } })) };
     },
     cancel: async ({ notifications }) => {
       for (const { id } of notifications) { holder.pending.delete(id); holder.cancelled.push(id); }
@@ -32,7 +33,7 @@ vi.mock('@capacitor/local-notifications', () => ({
   },
 }));
 
-const { scheduleNotifications, cancelAllNotifications, planLeadTitle, reminderId } = await import('./planNotifications.js');
+const { scheduleNotifications, cancelAllNotifications, planLeadTitle, reminderId, buildReminders } = await import('./planNotifications.js');
 const { dueReminders } = await import('./webNotify.js');
 const { fmtTime } = await import('./dates.js');
 const { default: i18n, i18nReady } = await import('../i18n');
@@ -55,6 +56,7 @@ beforeEach(() => {
   holder.pending.clear();
   holder.gate = null;
   holder.runs = 0;
+  holder.inFlight = 0;
   holder.overlapped = false;
 });
 
@@ -229,5 +231,42 @@ describe('reminder language', () => {
       expect(notif.examStartBody_other, f).toMatch(/\{\{label\}\}/);
       expect(notif.examStartBody_other, f).toMatch(/\{\{count\}\}/);
     }
+  });
+});
+
+// Review follow-ups to the StudyDesk#138 fix.
+describe('rescheduling, edge cases', () => {
+  it('the digest keeps its IDs and times as the days roll forward past midnight', () => {
+    const due = iso(new Date(Date.now() + 40 * DAY));
+    const args = [[{ id: 'e1', title: 'Final', dueDate: due }], [], {}, [], {}, t];
+    const evening = new Date(); evening.setHours(23, 0, 0, 0);
+    const morning = new Date(evening.getTime() + 2 * 60 * 60 * 1000); // 01:00 next day
+    const byId = (notes) => new Map(notes.filter((n) => n.title === t('notif.digestTitle')).map((n) => [n.id, n.extra.rk]));
+    const before = byId(buildReminders(...args, evening.getTime()));
+    const after = byId(buildReminders(...args, morning.getTime()));
+    // Everything after the next 09:00 is the same reminder, same fingerprint.
+    const shared = [...after.keys()].filter((id) => before.has(id));
+    expect(shared.length).toBeGreaterThanOrEqual(28);
+    for (const id of shared) expect(after.get(id)).toBe(before.get(id));
+  });
+
+  it('a reminder whose time has just come but has not fired yet is left to fire', async () => {
+    const soon = new Date(Date.now() + 60 * 60 * 1000);
+    await scheduleNotifications([], [], {}, [{ id: 'p1', startsAt: soon.toISOString(), title: 'Calc' }], { atStart: true }, t);
+    expect(holder.pending.size).toBe(1);
+    // Its time passes before the alarm fires; the next run no longer lists it.
+    const [only] = holder.pending.values();
+    only.extra.ra = Date.now() - 60 * 1000;
+    await scheduleNotifications([], [], {}, [], { atStart: true }, t);
+    expect(holder.cancelled).toEqual([]);
+  });
+
+  it('one long past is cleared', async () => {
+    const soon = new Date(Date.now() + 60 * 60 * 1000);
+    await scheduleNotifications([], [], {}, [{ id: 'p1', startsAt: soon.toISOString(), title: 'Calc' }], { atStart: true }, t);
+    const [only] = holder.pending.values();
+    only.extra.ra = Date.now() - 60 * 60 * 1000;
+    await scheduleNotifications([], [], {}, [], { atStart: true }, t);
+    expect(holder.cancelled).toHaveLength(1);
   });
 });

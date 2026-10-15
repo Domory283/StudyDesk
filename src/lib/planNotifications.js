@@ -51,7 +51,8 @@ function runLatest(job) {
         while (nextJob) {
           const j = nextJob;
           nextJob = null;
-          await j();
+          // A job that throws must not strand the one queued behind it.
+          try { await j(); } catch (e) { console.error("[StudyDesk] reminder job failed:", e); }
         }
       } finally {
         running = null;
@@ -95,10 +96,22 @@ export function reminderId(key) {
   return 100000 + ((h >>> 0) % 2000000000);
 }
 
-/** Give each note its ID from its key. Two keys hashing alike in one batch
- *  are told apart by probing upward; vanishingly rare, and the cost is only
- *  that the second one's ID depends on the first. Mutates and returns. */
-function assignIds(notes) {
+/** Bumped when something a pending reminder carries but getPending does not
+ *  report (icon, allow-while-idle, action type) changes, so the next run
+ *  re-sends every reminder once with it. */
+const REMINDER_FORMAT = 1;
+
+/** Give each note its ID from its key, and its fingerprint. Two keys hashing
+ *  alike in one batch are told apart by probing upward; vanishingly rare, and
+ *  the cost is only that the second one's ID depends on the first.
+ *
+ *  The fingerprint rides in `extra`, which the plugin hands back unchanged.
+ *  getPending's `schedule.at` cannot be compared instead: on Android it is a
+ *  java.util.Date's toString(), "Thu Oct 15 09:00:00 HST 2026", which JS
+ *  cannot parse for every zone (HST, AKST, AST among them), so there every
+ *  reminder would look changed on every run. `actionLabel` is the "Mark done"
+ *  text the reminder was scheduled with: the button is fixed then. */
+function assignIds(notes, actionLabel) {
   const used = new Set();
   for (const n of notes) {
     let id = reminderId(n.key);
@@ -106,15 +119,26 @@ function assignIds(notes) {
     used.add(id);
     n.id = id;
     delete n.key;
+    const at = n.schedule.at.getTime();
+    const fp = [REMINDER_FORMAT, n.title, n.body, at, n.actionTypeId ? actionLabel : ''].join('\u241f');
+    n.extra = { ...(n.extra || {}), rk: fp, ra: at };
   }
   return notes;
 }
 
-/** The same reminder as one already pending: same text, same time. */
+/** A pending reminder this run would schedule exactly as it is. */
 function samePending(p, n) {
-  const at = new Date(p?.schedule?.at ?? NaN).getTime();
-  return p.title === n.title && p.body === n.body
-    && Math.abs(at - n.schedule.at.getTime()) < 1000;
+  return typeof p?.extra?.rk === 'string' && p.extra.rk === n.extra.rk;
+}
+
+/** A pending reminder whose time has just come, but whose alarm has not
+ *  fired yet (alarm latency, or Doze rationing allow-while-idle alarms). The
+ *  new schedule no longer lists it, since it only lists the future; it is
+ *  left to fire rather than cancelled unseen. */
+const DUE_GRACE_MS = 15 * 60 * 1000;
+function dueAndPending(p, now) {
+  const at = Number(p?.extra?.ra);
+  return Number.isFinite(at) && at <= now && now - at <= DUE_GRACE_MS;
 }
 
 /** How far ahead planned-session reminders are scheduled, and how many.
@@ -153,7 +177,7 @@ export function scheduleNotifications(exams, assignments, courses, plannedSessio
 
 /** Every reminder the current state calls for, each with the `key` its ID is
  *  made from. Pure; `now` is a parameter for the tests. */
-export function buildReminders(exams, assignments, courses, plannedSessions, planPrefs, t, now = Date.now()) {
+export function buildReminders(exams, assignments, courses, plannedSessions, planPrefs, t, now = Date.now(), actionLabel = t('notif.markDone')) {
   const notes = [];
   const style = { smallIcon: "ic_stat_studydesk", iconColor: "#8b4a62" };
 
@@ -262,7 +286,7 @@ export function buildReminders(exams, assignments, courses, plannedSessions, pla
       }
     }
   }
-  return assignIds(notes);
+  return assignIds(notes, actionLabel);
 }
 
 async function scheduleNow(exams, assignments, courses, plannedSessions, planPrefs, t) {
@@ -271,8 +295,10 @@ async function scheduleNow(exams, assignments, courses, plannedSessions, planPre
     if (perm.display !== "granted") return;
     // Register action types before scheduling — must be set up before any
     // notification with actionTypeId fires or the button won't render.
-    await registerActionTypes(t('notif.markDone'));
-    const notes = buildReminders(exams, assignments, courses, plannedSessions, planPrefs, t);
+    const actionLabel = t('notif.markDone');
+    await registerActionTypes(actionLabel);
+    const now = Date.now();
+    const notes = buildReminders(exams, assignments, courses, plannedSessions, planPrefs, t, now, actionLabel);
     // v1.18.1 (StudyDesk#138): only what changed. A pending reminder with the
     // same ID, text and time stays as it is; everything else pending is
     // cancelled, and only the new or changed reminders are handed over, so
@@ -284,6 +310,7 @@ async function scheduleNow(exams, assignments, courses, plannedSessions, planPre
     for (const p of pending) {
       const n = wanted.get(p.id);
       if (n && samePending(p, n)) kept.add(p.id);
+      else if (!n && dueAndPending(p, now)) continue;
       else stale.push({ id: p.id });
     }
     if (stale.length > 0) await LocalNotifications.cancel({ notifications: stale });
