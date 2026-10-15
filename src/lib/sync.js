@@ -54,9 +54,11 @@ export async function recordAppOpen({ app, appVersion, platform, openedOn }) {
 
 // ── subjects (courses) ───────────────────────────────────────────────────────
 
-export async function upsertSubject({ id, name, credits, semester, color, archivedAt, schoolYear, updatedAt }) {
+// `insertOnly` (v1.18.1, StudyDesk#145) creates the row if the server lacks
+// it and leaves an existing row untouched; see setArchivedAt.
+export async function upsertSubject({ id, name, credits, semester, color, archivedAt, schoolYear, updatedAt }, { insertOnly = false } = {}) {
   const userId = await currentUserId();
-  const { error } = await supabase.from('subjects').upsert({
+  const row = {
     id,
     user_id: userId,
     name,
@@ -76,7 +78,10 @@ export async function upsertSubject({ id, name, credits, semester, color, archiv
     // about it (e.g. NCC, the add-course path) won't clobber an existing value.
     ...(schoolYear !== undefined ? { school_year: schoolYear } : {}),
     updated_at: pushStamp(updatedAt),
-  });
+  };
+  const { error } = insertOnly
+    ? await supabase.from('subjects').upsert(row, { onConflict: 'id', ignoreDuplicates: true })
+    : await supabase.from('subjects').upsert(row);
   if (error) throw error;
   return id;
 }
@@ -125,6 +130,12 @@ export async function restoreSemester(courses, semester) {
 // The push-time stamp lets the archive itself land over an older row. A
 // course the server has never seen (created offline, its own push still
 // queued or failed) gets the whole row instead.
+//
+// That fallback is INSERT-only. The update affects 0 rows when the row is
+// missing, but also when set_updated_at() declined it (the stored row is
+// newer) and when zz_skip_noop_update dropped it (archived_at already had
+// this value). A plain upsert of the snapshot then overwrote the newer row,
+// rename and all, which is the loss this function exists to prevent.
 async function setArchivedAt(course, archivedAt) {
   const { data, error } = await supabase
     .from('subjects')
@@ -142,7 +153,7 @@ async function setArchivedAt(course, archivedAt) {
     color: course.color,
     archivedAt,
     updatedAt: course.updatedAt,
-  });
+  }, { insertOnly: true });
 }
 
 export async function deleteSubject(id) {

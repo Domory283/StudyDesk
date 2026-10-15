@@ -4,9 +4,16 @@
 //   - a tombstone (deleted_at going from null to set) always lands;
 //   - otherwise an update older than the stored row is declined (the row is
 //     left as it was, and the request still succeeds, as in Postgres).
-// Upsert honours `onConflict`; update and delete take chained `.eq()` filters
-// and `.select()` returns the affected rows. Not a test file itself.
-export function makeLwwServer(initial = {}) {
+// And zz_skip_noop_update (20261006_realtime_echo_guard.sql): an UPDATE that
+// changes nothing but updated_at writes no row. That covers a declined update
+// too, which set_updated_at() turns back into the stored row. Either way the
+// row is not affected, so an `.update().select()` returns no rows for it, as
+// in production (v1.18.1, StudyDesk#145).
+// Upsert honours `onConflict` and `ignoreDuplicates`; update and delete take
+// chained `.eq()` filters and `.select()` returns the affected rows.
+// `clockAheadMs` puts the server's clock ahead of this device's. Not a test
+// file itself.
+export function makeLwwServer(initial = {}, { clockAheadMs = 0 } = {}) {
   const tables = {};
   for (const [k, rows] of Object.entries(initial)) tables[k] = rows.map((r) => ({ ...r }));
   let seq = 0;
@@ -15,7 +22,7 @@ export function makeLwwServer(initial = {}) {
   const log = [];
 
   function guard(oldRow, newRow) {
-    const now = Date.now();
+    const now = Date.now() + clockAheadMs;
     if (newRow.updated_at == null || t(newRow.updated_at) > now) newRow.updated_at = new Date(now).toISOString();
     if (!oldRow) return newRow;
     if (oldRow.deleted_at == null && newRow.deleted_at != null) {
@@ -25,6 +32,21 @@ export function makeLwwServer(initial = {}) {
     }
     if (oldRow.updated_at != null && t(newRow.updated_at) < Math.min(t(oldRow.updated_at), now)) return oldRow;
     return newRow;
+  }
+
+  // zz_skip_noop_update: compares every column but updated_at. By JSON value,
+  // so jsonb columns compare by content; timestamps compare as written.
+  const sameBut = (a, b) => {
+    const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+    keys.delete('updated_at');
+    return [...keys].every((k) => JSON.stringify(a[k] ?? null) === JSON.stringify(b[k] ?? null));
+  };
+
+  /** The row an UPDATE leaves, or null when no row is written. */
+  function applyUpdate(oldRow, patch) {
+    const next = guard(oldRow, { ...oldRow, ...patch });
+    if (next === oldRow || sameBut(next, oldRow)) return null;
+    return next;
   }
 
   function from(table) {
@@ -40,7 +62,11 @@ export function makeLwwServer(initial = {}) {
             const hit = [];
             for (let i = 0; i < rows.length; i++) {
               if (!filters.every(([c, v]) => rows[i][c] === v)) continue;
-              if (op === 'update') rows[i] = guard(rows[i], { ...rows[i], ...patch });
+              if (op === 'update') {
+                const next = applyUpdate(rows[i], patch);
+                if (!next) continue;
+                rows[i] = next;
+              }
               hit.push(rows[i]);
             }
             if (op === 'delete') tables[table] = rows.filter((r) => !hit.includes(r));
@@ -58,10 +84,13 @@ export function makeLwwServer(initial = {}) {
         if (i < 0) {
           rows.push(guard(null, { id: payload.id ?? genId(), deleted_at: null, ...payload }));
           log.push(['insert', table, payload]);
+        } else if (opts.ignoreDuplicates) {
+          // ON CONFLICT DO NOTHING.
+          log.push(['upsert-ignored', table, payload]);
         } else {
-          const next = guard(rows[i], { ...rows[i], ...payload });
-          log.push([next === rows[i] ? 'upsert-declined' : 'upsert', table, payload]);
-          rows[i] = next;
+          const next = applyUpdate(rows[i], payload);
+          log.push([next ? 'upsert' : 'upsert-no-row', table, payload]);
+          if (next) rows[i] = next;
         }
         return Promise.resolve({ error: null });
       },

@@ -34,8 +34,10 @@
 import { serverNow } from './serverClock.js';
 
 /** Outbox kinds whose push writes `updated_at`, and the table each lands in.
- *  Deletes are absent on purpose: under "delete wins" the server accepts a
- *  tombstone whatever its stamp. */
+ *  Deletes are absent on purpose, but for one: under "delete wins" the server
+ *  accepts a tombstone whatever its stamp. The exception is the attendance
+ *  clear, which can be followed by a re-mark that has to be newer than it
+ *  (see below). */
 export const STAMPED_KINDS = {
   upsert_subject: 'subjects',
   upsert_grade: 'grades',

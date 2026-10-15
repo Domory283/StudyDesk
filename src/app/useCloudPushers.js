@@ -3,9 +3,9 @@
 import { useEffect, useRef } from "react";
 import * as outbox from "../lib/outbox.js";
 import { isInSync, isRemoteTombstone } from "../lib/syncStamps.js";
-import { enqueueLegacyRows } from "../lib/legacyPush.js";
+import { runLegacyPush } from "../lib/legacyPush.js";
 
-export function useCloudPushers({ session, state, pulledOnceRef, remoteStampsRef, showFlash, t }) {
+export function useCloudPushers({ session, state, pulledOnce, pulledOnceRef, remoteStampsRef, showFlash, t }) {
   // ── v1.0.4 one-shot post-migration push ─────────────────────────────────────
   // The UUID migration in the reducer init may have rewritten local IDs. Those
   // rewritten rows have never reached Supabase (the old short-ID pushes were
@@ -13,22 +13,25 @@ export function useCloudPushers({ session, state, pulledOnceRef, remoteStampsRef
   // before grades (FK), grades before sessions doesn't matter (no FK between).
   // Fire-and-forget per row, log failures — next user edit will retry.
   //
-  // v1.18.1 (StudyDesk#146): queued through the outbox instead of pushed
-  // directly, and the flag is cleared once queued. Pushed directly, each row
-  // was stamped with the push time, and one row that could never succeed (a
-  // to-do whose course was deleted before it synced fails its foreign key)
-  // kept the flag set, so EVERY launch re-sent the whole dataset stamped
-  // "now" and overwrote edits made on other devices. The outbox stamps each
-  // row with its own edit time (payload.updatedAt, so a newer server copy
-  // wins), retries what can succeed, and sets aside what cannot.
+  // v1.18.1 (StudyDesk#146): queued through the outbox after the first pull,
+  // instead of pushed directly before it, and the flag is cleared once the
+  // queue write lands. Pushed directly, each row was stamped with the push
+  // time, and one row that could never succeed (a to-do whose course was
+  // deleted before it synced fails its foreign key) kept the flag set, so
+  // EVERY launch re-sent the whole dataset stamped "now" and overwrote edits
+  // made on other devices. Now only the to-dos the server lacks are queued:
+  // reconcile, in the same pull, queues every other row it lacks (see
+  // legacyPush.js). The flash says "waiting to sync", since queued is not
+  // yet synced.
   useEffect(() => {
-    if (!session) return;
-    if (localStorage.getItem("studydesk-needs-initial-push") !== "1") return;
-    const queued = enqueueLegacyRows(state);
-    try { localStorage.removeItem("studydesk-needs-initial-push"); } catch {}
-    if (queued > 0) showFlash(t('av.flash.syncedLegacy', { n: queued }));
+    if (!session || !pulledOnce) return;
+    // The first pull failed, so what the server holds is unknown. The flag
+    // stays, and the next launch tries again.
+    if (!remoteStampsRef.current) return;
+    const queued = runLegacyPush(state, remoteStampsRef.current);
+    if (queued > 0) showFlash(t('av.flash.queuedLegacy', { count: queued }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id]);
+  }, [session?.user?.id, pulledOnce]);
 
   // ── v1.7 push reconciler for assignments / exams / actions (StudyDesk#6) ────
   //
