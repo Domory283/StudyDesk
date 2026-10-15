@@ -18,16 +18,17 @@
 //      declares the same foreign key. That is deliberate: an explicit delete
 //      list is a thing you forget to update, and the failure is silent.
 //   4. What the cascade cannot reach is removed here (v1.18.1, limecore#61):
-//      the user's Storage files, before the account goes, so a failure stops
-//      the deletion and the user can retry; and the AI rate-limit rows keyed
-//      to the user id, after it. See userFiles.js.
+//      the user's files in every Storage bucket, before the account goes, and
+//      the AI rate-limit rows keyed to the user id, after it. A file failure
+//      is logged for the owner and does not block the erasure. See
+//      userFiles.js (eraseAccount).
 //
 // Deploy:  supabase functions deploy delete-account
 // Secrets: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected by the
 //          platform; nothing needs to be set by hand.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { removeUserFiles, rateLimitBuckets } from './userFiles.js';
+import { eraseAccount } from './userFiles.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -74,25 +75,8 @@ Deno.serve(async (req: Request) => {
   }
   if (!confirmed) return json({ error: 'Missing confirmation' }, 400);
 
-  // Storage first: nothing ties these files to the account, so once it is
-  // gone nothing would ever remove them.
-  try {
-    await removeUserFiles(admin, user.id);
-  } catch (e) {
-    console.error('delete-account: removing files failed', { userId: user.id, message: (e as Error).message });
-    return json({ error: 'Deletion failed' }, 500);
-  }
-
-  const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
-  if (delErr) {
-    console.error('delete-account failed', { userId: user.id, message: delErr.message });
-    return json({ error: 'Deletion failed' }, 500);
-  }
-
-  // Best effort: the account is already gone, so a failure here is logged for
-  // the owner rather than reported to the user as a failed deletion.
-  const { error: rlErr } = await admin.from('ai_rate_limits').delete().in('bucket', rateLimitBuckets(user.id));
-  if (rlErr) console.error('delete-account: rate-limit rows left', { userId: user.id, message: rlErr.message });
+  const result = await eraseAccount(admin, user.id);
+  if (!result.ok) return json({ error: 'Deletion failed' }, 500);
 
   // Deliberately logged without the email address: this line exists to prove a
   // deletion happened if anyone ever asks, and writing the identifier of a user
