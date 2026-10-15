@@ -2,15 +2,22 @@
 //
 // Deleting the auth user cascades to every table that references it, but not
 // to Storage: `storage.objects` references only its bucket. So the avatar and
-// every coursework attachment outlived the account. Both buckets keep a user's
+// every coursework attachment outlived the account. Each bucket keeps a user's
 // files under `<user id>/…` (their policies check `foldername(name)[1]`), so
 // that folder is everything to remove.
 //
 // Plain JavaScript with no Deno or npm imports, so the unit test can run it
 // under Node with a stand-in client.
 
-/** Every bucket that keeps files per user, under `<user id>/`. */
-export const USER_FILE_BUCKETS = ['avatars', 'assignment-attachments'];
+/** Every bucket that keeps files per user, under `<user id>/`. `notebook`
+ *  exists once 20261015_notebook_bucket.sql is applied (StudyDesk#153); until
+ *  then it is treated as empty. */
+export const USER_FILE_BUCKETS = ['avatars', 'assignment-attachments', 'notebook'];
+
+/** Storage's answer for a bucket that does not exist. */
+function isMissingBucket(error) {
+  return /bucket not found/i.test(error?.message || '') || String(error?.statusCode) === '404';
+}
 
 const PAGE = 1000;
 
@@ -20,6 +27,7 @@ async function listFiles(bucket, prefix) {
   const out = [];
   for (let offset = 0; ; offset += PAGE) {
     const { data, error } = await bucket.list(prefix, { limit: PAGE, offset });
+    if (error && isMissingBucket(error)) return out;
     if (error) throw error;
     for (const entry of data ?? []) {
       const path = `${prefix}/${entry.name}`;

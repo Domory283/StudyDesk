@@ -40,7 +40,7 @@ describe('removeUserFiles (limecore#61)', () => {
       'assignment-attachments': ['u1/a1/essay.pdf', 'u1/a2/notes.png', 'u1/a2/draft.docx', 'u2/a9/x.pdf'],
     });
     const removed = await removeUserFiles(admin, 'u1');
-    expect(removed).toEqual({ avatars: 1, 'assignment-attachments': 3 });
+    expect(removed).toEqual({ avatars: 1, 'assignment-attachments': 3, notebook: 0 });
     expect([...admin.store.avatars]).toEqual(['u2/avatar.jpg']);
     expect([...admin.store['assignment-attachments']]).toEqual(['u2/a9/x.pdf']);
   });
@@ -55,7 +55,7 @@ describe('removeUserFiles (limecore#61)', () => {
   });
 
   it('a user with no files is fine', async () => {
-    expect(await removeUserFiles(fakeStorage({}), 'u1')).toEqual({ avatars: 0, 'assignment-attachments': 0 });
+    expect(await removeUserFiles(fakeStorage({}), 'u1')).toEqual({ avatars: 0, 'assignment-attachments': 0, notebook: 0 });
   });
 
   it('stops at the first failure, so the account is not deleted with files left', async () => {
@@ -63,6 +63,25 @@ describe('removeUserFiles (limecore#61)', () => {
     const from = admin.storage.from;
     admin.storage.from = (b) => ({ ...from(b), remove: async () => ({ data: null, error: new Error('storage down') }) });
     await expect(removeUserFiles(admin, 'u1')).rejects.toThrow('storage down');
+  });
+});
+
+describe('a bucket not created yet (StudyDesk#153)', () => {
+  it('counts as empty, so deletion is not blocked before the notebook migration', async () => {
+    const admin = fakeStorage({ avatars: ['u1/avatar.jpg'] });
+    const from = admin.storage.from;
+    admin.storage.from = (b) =>
+      b === 'notebook'
+        ? { ...from(b), list: async () => ({ data: null, error: { message: 'Bucket not found', statusCode: '404' } }) }
+        : from(b);
+    expect(await removeUserFiles(admin, 'u1')).toEqual({ avatars: 1, 'assignment-attachments': 0, notebook: 0 });
+  });
+
+  it('any other listing error still stops the deletion', async () => {
+    const admin = fakeStorage({});
+    const from = admin.storage.from;
+    admin.storage.from = (b) => ({ ...from(b), list: async () => ({ data: null, error: { message: 'timeout', statusCode: '500' } }) });
+    await expect(removeUserFiles(admin, 'u1')).rejects.toMatchObject({ message: 'timeout' });
   });
 });
 
