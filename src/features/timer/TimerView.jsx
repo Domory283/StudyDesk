@@ -14,7 +14,7 @@ import { Capacitor } from '@capacitor/core';
 import { fmtTime } from '../../lib/dates.js';
 import { startFocus, stopFocus } from '../../lib/focusMode.js';
 import { enterSubmit } from '../../lib/imeSubmit.js';
-import { TIMER_CHANGE_EVENT } from '../../lib/timerSnapshot.js';
+import { TIMER_CHANGE_EVENT, finishedWhileAway } from '../../lib/timerSnapshot.js';
 import { pastSessionDraft } from '../../lib/pastSession.js';
 import { preferredDayStart, studyDayKey, todayStudyDayKey, dayKeyToDate } from '../../lib/studyDay.js';
 import '../../styles/timer.css';
@@ -62,6 +62,11 @@ function FocusMinutesInput({ text, setText, commit, disabled, className, label }
   );
 }
 
+// v1.18.1 (StudyDesk#149): the run whose away-completion has been handled,
+// by its start time. Module-level so React's StrictMode double effect, or a
+// quick remount, cannot complete the same block twice.
+let completedAwayRun = null;
+
 export default function TimerView({ state, onTimerComplete }) {
   const { t } = useTranslation();
   // #54 — the user's day boundary, read once. Declared up here with the rest
@@ -88,6 +93,9 @@ export default function TimerView({ state, onTimerComplete }) {
   const [secsLeft, setSecsLeft] = useState(_initSecs);
   // If timer ran out while away, don't auto-resume
   const [running, setRunning] = useState(_saved.running && _initSecs > 0 ? true : false);
+  // v1.18.1 (StudyDesk#149): ...but do finish it (see the effect below
+  // handlePhaseEnd). Read once, from the state this mount restored.
+  const [endedAway] = useState(() => (finishedWhileAway(_saved) ? _saved.startedAt : null));
   const [session, setSession] = useState(_saved.session||0); // 0-3, cycles every 4
   const [focusDone, setFocusDone] = useState(_saved.focusDone||0); // total focus sessions today
   const [task, setTask] = useState(_saved.task||"");
@@ -241,6 +249,18 @@ export default function TimerView({ state, onTimerComplete }) {
       setSecsLeft(cf*60);
     }
   }, [fireCompletionAlert, onTimerComplete]);
+
+  // v1.18.1 (StudyDesk#149): a block that reached zero while this view was
+  // not mounted (another tab, or Android killed the process) was lost: the
+  // restore above starts it at 0 and paused, so handlePhaseEnd never ran. No
+  // alert, no save sheet, no focusDone count, no break. Finish it now, once
+  // per run, as the tick would have.
+  useEffect(() => {
+    if (endedAway == null || completedAwayRun === endedAway) return;
+    completedAwayRun = endedAway;
+    handlePhaseEnd();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const tick = useCallback(() => {
     // A stopwatch has no zero to reach, so it never calls handlePhaseEnd - no
@@ -405,22 +425,29 @@ export default function TimerView({ state, onTimerComplete }) {
   // Exiting Lock In stops the timer cleanly so the user explicitly chooses
   // whether to keep going in regular mode.
   const toggleLockIn = () => {
-    setLockedIn(li => {
-      const next = !li;
-      if (next) {
-        // Entering Lock In — reset to a fresh focus block at current custom duration.
-        // Lock In counts down by definition, so it always runs in Pomodoro mode;
-        // changing that is out of scope for this milestone.
-        setMode('pomodoro');
-        setPhase("focus");
-        setSecsLeft(customFocus * 60);
-        setSession(0);
-      } else {
-        // Exiting Lock In — stop and let the user reorient.
+    const next = !lockedIn;
+    if (next) {
+      // v1.18.1 (StudyDesk#149): a run in progress stops first, and its focus
+      // time is offered for saving, as Stop, Skip and a mode switch do. The
+      // display was reset to a full block while the run's start time and
+      // seconds stayed behind, so a resume jumped back to the old run's
+      // countdown, or finished a "25-minute" block that was a break.
+      if (running) {
         setRunning(false);
+        harvestFocus();
       }
-      return next;
-    });
+      // Entering Lock In — reset to a fresh focus block at current custom duration.
+      // Lock In counts down by definition, so it always runs in Pomodoro mode;
+      // changing that is out of scope for this milestone.
+      setMode('pomodoro');
+      setPhase("focus");
+      setSecsLeft(customFocus * 60);
+      setSession(0);
+    } else {
+      // Exiting Lock In — stop and let the user reorient.
+      setRunning(false);
+    }
+    setLockedIn(next);
   };
 
   // While locked in we add a body class so the bottom mobile tab bar and
