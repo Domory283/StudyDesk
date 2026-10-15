@@ -5,6 +5,7 @@ import { App as CapApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { supabase, readStoredSession } from "./lib/supabase.js";
 import { startSessionBoot } from "./lib/sessionBoot.js";
+import { otherAccountClearedMessage } from "./lib/noteFlush.js";
 import { claimForUser, readOwner } from "./lib/deviceOwner.js";
 import AuthGate from "./features/auth/AuthGate.jsx";
 import SetPasswordScreen from "./features/auth/SetPasswordScreen.jsx";
@@ -259,6 +260,12 @@ export default function App() {
     });
     return () => { cancelled = true; clearTimeout(giveUp); };
   }, [session]);
+  // v1.18.1 (StudyDesk#161): the session effect below subscribes once, so it
+  // reaches the current flash and language through this ref.
+  const otherAccountNoticeRef = useRef(null);
+  useEffect(() => {
+    otherAccountNoticeRef.current = (unsent) => showFlash(otherAccountClearedMessage(t, unsent));
+  });
   useEffect(() => {
     // v1.18.1 (limecore#59 §1): one place every session passes through. When
     // it belongs to a different account than the local data, that data (and
@@ -268,8 +275,12 @@ export default function App() {
     const applySession = (s, event) => {
       if (claimForUser(s?.user?.id)) {
         console.warn("[studydesk] a different account signed in; clearing the previous account's local data");
+        // v1.18.1 (StudyDesk#161): and say so, with what never synced. The
+        // only trace used to be the console line above.
+        const unsent = outbox.getStatus().pending;
         wipeAccountLocalData();
         dispatch({ type: "RESET_AFTER_SIGNOUT" });
+        otherAccountNoticeRef.current?.(unsent);
       }
       setSession(s);
       scheduleOriginStamp(s?.user ?? null);
@@ -366,6 +377,14 @@ export default function App() {
       requestPullRef.current = null;
       return;
     }
+    // v1.18.1 (StudyDesk#161): a new user id starts from nothing. This effect
+    // re-runs only when the user id changes, and the reset used to happen only
+    // on sign-out, so switching straight from one account to another (a
+    // recovery or magic link opened while signed in) kept the first
+    // account's "pulled" flag and pull stamps until the new pull settled.
+    pulledOnceRef.current = false;
+    setPulledOnce(false);
+    remoteStampsRef.current = null;
     let cancelled = false;
     let lastPullAt = NaN;
     const doPull = async () => {
