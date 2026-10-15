@@ -5,7 +5,7 @@ import { App as CapApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { supabase, readStoredSession } from "./lib/supabase.js";
 import { startSessionBoot } from "./lib/sessionBoot.js";
-import { otherAccountClearedMessage } from "./lib/noteFlush.js";
+import { otherAccountClearedMessage, requestNoteFlush } from "./lib/noteFlush.js";
 import { claimForUser, readOwner } from "./lib/deviceOwner.js";
 import AuthGate from "./features/auth/AuthGate.jsx";
 import SetPasswordScreen from "./features/auth/SetPasswordScreen.jsx";
@@ -260,11 +260,16 @@ export default function App() {
     });
     return () => { cancelled = true; clearTimeout(giveUp); };
   }, [session]);
-  // v1.18.1 (StudyDesk#161): the session effect below subscribes once, so it
-  // reaches the current flash and language through this ref.
+  // v1.18.1 (StudyDesk#161): shown when a different account's sign-in
+  // cleared the previous account's data. A banner the user closes, not a
+  // 2-second flash: it reports data removed, it is a long sentence, and a
+  // recovery link opens the set-password screen first, where no flash is
+  // drawn. The session effect below subscribes once, so it reaches the
+  // current language through the ref.
+  const [accountNotice, setAccountNotice] = useState(null);
   const otherAccountNoticeRef = useRef(null);
   useEffect(() => {
-    otherAccountNoticeRef.current = (unsent) => showFlash(otherAccountClearedMessage(t, unsent));
+    otherAccountNoticeRef.current = (unsent) => setAccountNotice(otherAccountClearedMessage(t, unsent));
   });
   useEffect(() => {
     // v1.18.1 (limecore#59 §1): one place every session passes through. When
@@ -276,7 +281,11 @@ export default function App() {
       if (claimForUser(s?.user?.id)) {
         console.warn("[studydesk] a different account signed in; clearing the previous account's local data");
         // v1.18.1 (StudyDesk#161): and say so, with what never synced. The
-        // only trace used to be the console line above.
+        // only trace used to be the console line above. Note edits still in
+        // their debounce are queued first, so they are counted, and so their
+        // timers cannot fire after the wipe and send the previous account's
+        // note up under this one.
+        requestNoteFlush();
         const unsent = outbox.getStatus().pending;
         wipeAccountLocalData();
         dispatch({ type: "RESET_AFTER_SIGNOUT" });
@@ -955,6 +964,12 @@ export default function App() {
       />
     )}
     {flash&&<div className="flash">{flash}</div>}
+    {accountNotice&&(
+      <div className="flash flash--notice" role="status">
+        <span>{accountNotice}</span>
+        <button type="button" className="flash__close" onClick={()=>setAccountNotice(null)} aria-label={t('common.close')}>×</button>
+      </div>
+    )}
     {/* Item 8 — asks once per account, only inside the account-age window,
         and only once onboarding is out of the way. Guests have no auth
         metadata to write to, so `session?.user` is the whole gate. */}
