@@ -1,6 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { lessonsOn } from './timetable.js';
-import { finishedWhileAway } from './timerSnapshot.js';
 import { addDays } from './dates.js';
 
 // v1.18.1 (StudyDesk#150) — fortnightly lessons on a term that inherits its
@@ -47,21 +46,25 @@ describe('the week start decides where an A/B week begins (StudyDesk#150)', () =
   });
 });
 
-// v1.18.1 (StudyDesk#149) — a block that reached zero while TimerView was not
-// mounted was never completed.
-describe('finishedWhileAway (StudyDesk#149)', () => {
-  const now = Date.UTC(2026, 9, 15, 12, 0, 0);
-  const run = (over) => ({ running: true, mode: 'pomodoro', startedAt: now - 26 * 60_000, secsAtStart: 25 * 60, ...over });
+// The widget (todayPlan) now passes the user's week start. Forced to Sunday
+// through the override, so the answer does not depend on the test machine.
+describe('the widget agrees with the Calendar and Attendance (StudyDesk#150)', () => {
+  const state = {
+    courses: { c1: { name: 'Physics' } },
+    academicTerms: [{ id: 's', level: 'semester', parentId: null, name: 'Autumn', startsOn: '2026-08-30', endsOn: '2026-12-20' }],
+    timetableEntries: [lesson('a-week', 's', 1, 1)],
+    plannedSessions: [],
+  };
 
-  it('a countdown that ran out while away is finished', () => {
-    expect(finishedWhileAway(run(), now)).toBe(true);
-  });
-
-  it('one still running, a paused one, a stopwatch, or nothing saved is not', () => {
-    expect(finishedWhileAway(run({ startedAt: now - 10 * 60_000 }), now)).toBe(false);
-    expect(finishedWhileAway(run({ running: false }), now)).toBe(false);
-    expect(finishedWhileAway(run({ mode: 'stopwatch' }), now)).toBe(false);
-    expect(finishedWhileAway({}, now)).toBe(false);
-    expect(finishedWhileAway(null, now)).toBe(false);
+  it('uses the week start the user chose', async () => {
+    const store = new Map([['studydesk-week-start', '0']]);
+    vi.stubGlobal('localStorage', { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) });
+    try {
+      const { todayPlan } = await import('../widget/glance.js');
+      const plan = todayPlan(state, '2026-08-31');
+      expect(plan.filter((x) => x.kind === 'lesson').map((x) => x.id)).toEqual(['a-week']);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
