@@ -274,7 +274,8 @@ export async function deleteStudySession(id) {
 // ROW — for every record of that kind, not just the ones using the feature.
 // `20260911_notebook_layout.sql` documents that trap as a warning to read
 // carefully. A warning is not a mechanism, and the two v1.14 migrations below
-// it are both unapplied at the time of writing.
+// it were both unapplied when this was written. (Both are applied now, checked
+// 2026-10-13 for limecore#63; the fallback stays for the next new column.)
 //
 // So: send everything, and if the database says it does not know a column,
 // drop exactly the ones this call declared optional and try once more. The
@@ -311,7 +312,7 @@ export async function upsertAssignment({ id, courseId, title, type, dueDate, due
     // The local model stores an empty string when the user clears the date;
     // `date` columns reject '' but accept null.
     due_date: dueDate || null,
-    // v1.14 Item 5 — pending 20260912_assignment_due_time.sql.
+    // v1.14 Item 5 — from 20260912_assignment_due_time.sql (applied).
     due_time: dueTimeToSql(dueTime),
     notes: notes || null,
     done: Boolean(done),
@@ -457,7 +458,8 @@ export async function upsertPlannedSession({ id, subjectId, startsAt, durationMi
   row.dismissed_at = dismissedAt || null;
   if (row.fulfilled_by && row.dismissed_at) row.dismissed_at = null;
   // v1.14 Item 7a — which repeating plan this block was materialised from, or
-  // null for a one-off. Optional below, pending 20260913_planned_series_id.sql.
+  // null for a one-off. Optional below; from 20260913_planned_series_id.sql
+  // (applied).
   row.series_id = seriesId || null;
   await upsertTolerant('planned_sessions', row, ['series_id']);
   return id;
@@ -543,8 +545,8 @@ export async function upsertTimetableEntry({ id, termId, subjectId, title, weekd
     // already means, so no backfill and no special case on read.
     week_parity: weekParity === 1 || weekParity === 2 ? weekParity : null,
     // v1.14 Item 6a — which multi-weekday set this lesson belongs to, or null
-    // for a lesson that meets on one day. Optional below, pending
-    // 20260913_timetable_series_id.sql.
+    // for a lesson that meets on one day. Optional below; from
+    // 20260913_timetable_series_id.sql (applied).
     series_id: seriesId || null,
     updated_at: pushStamp(updatedAt),
   }, ['series_id']);
