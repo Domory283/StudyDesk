@@ -1,0 +1,3 @@
+A better notebook.
+
+Pages keep growing as you write, and text boxes move freely with a mouse or a finger. On desktop, formatting is visible: a toolbar, shortcuts in the tooltips and a "?" sheet. The notebook has a cleaner new look and many editing fixes: the cursor lands where you tap, and lists continue properly after Enter. Ko-fi supporters confirm an alternate payment email with a code. Also newer translation and icon libraries.

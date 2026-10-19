@@ -1,0 +1,3 @@
+Ein besseres Notizbuch.
+
+Seiten wachsen beim Schreiben mit, und Textfelder lassen sich frei mit Maus oder Finger verschieben. Am Desktop ist die Formatierung sichtbar: Symbolleiste, Tastenkürzel in den Tooltips und eine „?“-Übersicht. Neuer, klarerer Look und viele Korrekturen: Der Cursor landet, wo du tippst, und Listen laufen nach Enter richtig weiter. Ko-fi-Unterstützer bestätigen eine alternative Zahlungs-E-Mail mit einem Code.

@@ -1,0 +1,3 @@
+Buku catatan yang lebih baik.
+
+Halaman terus bertambah saat kamu menulis, dan kotak teks bisa dipindah bebas dengan mouse atau jari. Di desktop, format terlihat: bilah alat, pintasan di tooltip, dan lembar "?". Tampilan baru yang lebih bersih dan banyak perbaikan: kursor muncul di tempat kamu mengetuk, dan daftar berlanjut dengan benar setelah Enter. Pendukung Ko-fi mengonfirmasi email pembayaran alternatif dengan kode.

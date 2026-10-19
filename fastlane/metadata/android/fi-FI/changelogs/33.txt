@@ -1,0 +1,3 @@
+Parempi muistikirja.
+
+Sivu jatkuu kirjoittaessasi, ja tekstiruutuja voi siirtää vapaasti hiirellä tai sormella. Työpöydällä muotoilu näkyy: työkalurivi, pikanäppäimet vihjeissä ja ”?”-ohje. Muistikirjalla on uusi, selkeämpi ilme ja paljon korjauksia: kursori osuu siihen, mihin napautat, ja luettelot jatkuvat oikein Enterin jälkeen. Ko-fi-tukijat vahvistavat vaihtoehtoisen maksusähköpostin koodilla.
