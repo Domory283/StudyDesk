@@ -190,6 +190,9 @@
     "profileSaved": "Profil enregistré",
     "profileSaveFailed": "Impossible d’enregistrer le profil : {{msg}}",
     "signOutConfirm": "Se déconnecter de StudyDesk ? Vos données synchronisées restent dans le cloud et réapparaîtront à votre reconnexion.",
+    "signOutUnsynced_one": "Se déconnecter ? 1 modification sur cet appareil n'a pas encore atteint le cloud et sera perdue.",
+    "signOutUnsynced_many": "Se déconnecter ? {{count}} modifications sur cet appareil n'ont pas encore atteint le cloud et seront perdues.",
+    "signOutUnsynced_other": "Se déconnecter ? {{count}} modifications sur cet appareil n'ont pas encore atteint le cloud et seront perdues.",
     "signedOutLocal": "Déconnecté · mode local",
     "signOutFailed": "Échec de la déconnexion : {{msg}}",
     "notSignedIn": "Non connecté",
@@ -430,7 +433,12 @@
     "updateRestart": "Redémarrer pour mettre à jour",
     "updateDownload": "Télécharger et installer",
     "fdroidCheck": "Rechercher les mises à jour sur F-Droid",
-    "fdroidCheckNote": "Une fois par jour, StudyDesk demande à f-droid.org quelle est la version la plus récente. Rien vous concernant n’est envoyé. Désactivée, la requête n’est plus envoyée du tout."
+    "fdroidCheckNote": "Une fois par jour, StudyDesk demande à f-droid.org quelle est la version la plus récente. Rien vous concernant n’est envoyé. Désactivée, la requête n’est plus envoyée du tout.",
+    "otherAccountCleared": "Connexion à un autre compte : les données du compte précédent ont été supprimées de cet appareil.",
+    "otherAccountClearedUnsent_one": "Connexion à un autre compte : les données du compte précédent ont été supprimées de cet appareil, dont {{count}} modification non synchronisée.",
+    "otherAccountClearedUnsent_many": "Connexion à un autre compte : les données du compte précédent ont été supprimées de cet appareil, dont {{count}} modifications non synchronisées.",
+    "otherAccountClearedUnsent_other": "Connexion à un autre compte : les données du compte précédent ont été supprimées de cet appareil, dont {{count}} modifications non synchronisées.",
+    "otherTabReloaded": "Connexion ou déconnexion dans un autre onglet : cet onglet a été rechargé."
   },
   "sdob": {
     "brand": "Arrête de choisir. Commence à réviser.",

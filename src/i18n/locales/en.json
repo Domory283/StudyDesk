@@ -189,6 +189,8 @@
     "profileSaved": "Profile saved",
     "profileSaveFailed": "Couldn't save profile: {{msg}}",
     "signOutConfirm": "Sign out of StudyDesk? Your synced data stays in the cloud and will reappear when you sign back in.",
+    "signOutUnsynced_one": "Sign out? 1 change on this device hasn't reached the cloud yet and will be lost.",
+    "signOutUnsynced_other": "Sign out? {{count}} changes on this device haven't reached the cloud yet and will be lost.",
     "signedOutLocal": "Signed out · local mode",
     "signOutFailed": "Sign-out failed: {{msg}}",
     "notSignedIn": "Not signed in",
@@ -428,7 +430,11 @@
     "updateRestart": "Restart to update",
     "updateDownload": "Download & install",
     "fdroidCheck": "Check F-Droid for updates",
-    "fdroidCheckNote": "Once a day, StudyDesk asks f-droid.org for its newest version. Nothing about you is sent. Turning this off stops the request entirely."
+    "fdroidCheckNote": "Once a day, StudyDesk asks f-droid.org for its newest version. Nothing about you is sent. Turning this off stops the request entirely.",
+    "otherAccountCleared": "You signed in to a different account, so the previous account's data was removed from this device.",
+    "otherAccountClearedUnsent_one": "You signed in to a different account, so the previous account's data was removed from this device, including {{count}} change that had not synced.",
+    "otherAccountClearedUnsent_other": "You signed in to a different account, so the previous account's data was removed from this device, including {{count}} changes that had not synced.",
+    "otherTabReloaded": "You signed in or out in another tab, so this tab was reloaded to match."
   },
   "sdob": {
     "brand": "Stop deciding. Start studying.",

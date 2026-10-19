@@ -3,7 +3,10 @@ import { useTranslation } from "react-i18next";
 import { fmtToday } from "./lib/dates.js";
 import { App as CapApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
-import { supabase } from "./lib/supabase.js";
+import { supabase, readStoredSession } from "./lib/supabase.js";
+import { startSessionBoot } from "./lib/sessionBoot.js";
+import { otherAccountClearedMessage, requestNoteFlush } from "./lib/noteFlush.js";
+import { claimForUser, readOwner, isPageStale, watchPageStale, reloadStalePage, takeStaleReloadNotice, STALE_RELOAD_FALLBACK_MS } from "./lib/deviceOwner.js";
 import AuthGate from "./features/auth/AuthGate.jsx";
 import SetPasswordScreen from "./features/auth/SetPasswordScreen.jsx";
 import { isRecoveryPending, subscribeRecovery } from "./lib/passwordRecovery.js";
@@ -11,6 +14,7 @@ import { isGuestMode, setGuestMode } from "./lib/guestMode.js";
 import { scheduleOriginStamp } from "./lib/originMarker.js";
 import { watchAppOpens } from "./lib/appOpens.js";
 import { refreshEntitlement } from "./lib/entitlement.js";
+import { wipeAccountLocalData } from "./lib/accountWipe.js";
 import { downloadExport } from "./lib/dataRights.js";
 import StorageAlert from "./features/settings/StorageAlert.jsx";
 import FdroidUpdateNote from "./features/update/FdroidUpdateNote.jsx";
@@ -243,49 +247,69 @@ export default function App() {
     if (!session) { setOnboardChecked(true); return; }
     let cancelled = false;
     setOnboardChecked(false);
+    // v1.18.1 (StudyDesk#142): offline on a stored session, this check waits
+    // on the same ~50 s token refresh, and until it answers neither the
+    // wizard nor the app renders. Stop waiting after a few seconds; a late
+    // "already onboarded" still lands.
+    const giveUp = setTimeout(() => { if (!cancelled) setOnboardChecked(true); }, 5000);
     hydrateOnboardedFromCloud().then((done) => {
+      clearTimeout(giveUp);
       if (cancelled) return;
       if (done) setOnboarded(true);
       setOnboardChecked(true);
     });
-    return () => { cancelled = true; };
+    return () => { cancelled = true; clearTimeout(giveUp); };
   }, [session]);
+  // v1.18.1 (StudyDesk#161): shown when a different account's sign-in
+  // cleared the previous account's data. A banner the user closes, not a
+  // 2-second flash: it reports data removed, it is a long sentence, and a
+  // recovery link opens the set-password screen first, where no flash is
+  // drawn. The session effect below subscribes once, so it reaches the
+  // current language through the ref.
+  const [accountNotice, setAccountNotice] = useState(null);
+  const otherAccountNoticeRef = useRef(null);
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      let { data } = await supabase.auth.getSession();
-
-      // v1.1 — auto-inherit from NCC on cold start when no local session.
-      //
-      // Why: Supabase rotates refresh_tokens on every refresh. NCC and
-      // StudyDesk share ONE logical session via the SSO bundle but each
-      // app's supabase client persists its own copy. When NCC's background
-      // auto-refresh rotates the token, StudyDesk's stored refresh_token
-      // becomes stale; its next refresh attempt fails; onAuthStateChange
-      // fires SIGNED_OUT. Symptom: every cold start lands the user on
-      // AuthGate needing to tap Continue with Nexus again.
-      //
-      // Fix: when getSession() returns null, probe NCC's ContentProvider
-      // and silently inherit. As long as NCC is signed in, this re-syncs
-      // StudyDesk to the latest published bundle without user-visible
-      // re-auth. Guest mode and the web platform short-circuit this path.
-      if (!data.session && !isGuestMode() && Capacitor.isNativePlatform()) {
-        try {
-          const result = await inheritFromNexus();
-          if (result.ok) {
-            ({ data } = await supabase.auth.getSession());
-          }
-        } catch (e) {
-          console.warn("[studydesk] auto-inherit on init failed:", e);
-        }
+    otherAccountNoticeRef.current = (unsent) => setAccountNotice(otherAccountClearedMessage(t, unsent));
+  });
+  // v1.18.1 (StudyDesk#169): this tab was reloaded because another tab
+  // changed the account; say so once, in the same banner.
+  useEffect(() => {
+    if (takeStaleReloadNotice()) setAccountNotice(t('settings.otherTabReloaded'));
+  // Mount only: the flag is taken once.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    // v1.18.1 (limecore#59 §1): one place every session passes through. When
+    // it belongs to a different account than the local data, that data (and
+    // the outbox) is wiped BEFORE the pull and the reconciler see the new
+    // session; otherwise the second account would see the first account's
+    // courses, grades and notes, and upload its unsynced rows as its own.
+    const applySession = (s, event) => {
+      // v1.18.1 (StudyDesk#169): another tab wiped the local data (a
+      // different account signed in there, or a sign-out), so what this tab
+      // holds in memory is the previous account's. claimForUser cannot see
+      // it: the other tab already wrote the new owner. Wiping from here would
+      // also remove what that tab has since written for the new account, so
+      // this tab starts again from storage instead. Writes from it are
+      // already refused (isPageStale in localStore, outbox and sync), and the
+      // session is not applied, so no pull, reconcile or push runs for it.
+      if (isPageStale()) {
+        reloadStalePage();
+        return;
       }
-
-      if (!cancelled) setSession(data.session);
-      // ACT-5 — cover the restored-session path too, not just fresh sign-ins.
-      // Every account that predates this instrumentation only ever appears here.
-      scheduleOriginStamp(data.session?.user ?? null);
-    })();
-    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      if (claimForUser(s?.user?.id)) {
+        console.warn("[studydesk] a different account signed in; clearing the previous account's local data");
+        // v1.18.1 (StudyDesk#161): and say so, with what never synced. The
+        // only trace used to be the console line above. Note edits still in
+        // their debounce are queued first, so they are counted, and so their
+        // timers cannot fire after the wipe and send the previous account's
+        // note up under this one.
+        requestNoteFlush();
+        const unsent = outbox.getStatus().pending;
+        wipeAccountLocalData();
+        dispatch({ type: "RESET_AFTER_SIGNOUT" });
+        otherAccountNoticeRef.current?.(unsent);
+      }
       setSession(s);
       scheduleOriginStamp(s?.user ?? null);
       // v1.1 — any successful sign-in clears guestMode so the user resumes
@@ -301,8 +325,62 @@ export default function App() {
         setGuestMode(false);
         window.dispatchEvent(new CustomEvent("studydesk:guest-mode-changed"));
       }
+    };
+
+    // v1.1 — auto-inherit from NCC on cold start when no local session.
+    //
+    // Why: Supabase rotates refresh_tokens on every refresh. NCC and
+    // StudyDesk share ONE logical session via the SSO bundle but each
+    // app's supabase client persists its own copy. When NCC's background
+    // auto-refresh rotates the token, StudyDesk's stored refresh_token
+    // becomes stale; its next refresh attempt fails; onAuthStateChange
+    // fires SIGNED_OUT. Symptom: every cold start lands the user on
+    // AuthGate needing to tap Continue with Nexus again.
+    //
+    // Fix: when there is no session, probe NCC's ContentProvider and
+    // silently inherit. As long as NCC is signed in, this re-syncs
+    // StudyDesk to the latest published bundle without user-visible
+    // re-auth. Guest mode and the web platform short-circuit this path.
+    // v1.18.1 (limecore#59 §1): only the account that owns this device's
+    // data is inherited silently; another one waits for the user on AuthGate.
+    const inherit = async () => {
+      if (isGuestMode() || !Capacitor.isNativePlatform()) return null;
+      try {
+        const result = await inheritFromNexus({ onlyUserId: readOwner() || undefined });
+        if (result.ok) return (await supabase.auth.getSession()).data.session;
+      } catch (e) {
+        console.warn("[studydesk] auto-inherit on init failed:", e);
+      }
+      return null;
+    };
+
+    // v1.18.1 (StudyDesk#142): see src/lib/sessionBoot.js.
+    const boot = startSessionBoot({ auth: supabase.auth, readStoredSession, inherit, apply: applySession });
+    // v1.18.1 (StudyDesk#169): told the moment another tab wipes the data.
+    // The reload waits for this tab's next auth event (the other tab's
+    // sign-in or sign-out, which auth-js relays), so it starts on the new
+    // session rather than the one a sign-out is still removing. A fallback
+    // covers a sign-out that could not reach the server, which relays
+    // nothing; until then this tab writes nothing.
+    let staleFallback = 0;
+    const unwatchStale = watchPageStale(() => {
+      staleFallback = setTimeout(reloadStalePage, STALE_RELOAD_FALLBACK_MS);
     });
-    return () => { cancelled = true; sub.subscription.unsubscribe(); };
+    // A sign-out that could not reach the server (SettingsView) removes the
+    // stored session itself; auth-js then emits nothing, so it says so here.
+    // Held until SettingsView reports the signOut call settled, so a refresh
+    // still in flight cannot sign the user back in meanwhile.
+    const onLocalSignOut = () => { boot.holdSignedOut(true); setSession(null); };
+    const onSignOutSettled = () => boot.holdSignedOut(false);
+    window.addEventListener("studydesk:signed-out-local", onLocalSignOut);
+    window.addEventListener("studydesk:sign-out-settled", onSignOutSettled);
+    return () => {
+      boot.cancel();
+      unwatchStale();
+      clearTimeout(staleFallback);
+      window.removeEventListener("studydesk:signed-out-local", onLocalSignOut);
+      window.removeEventListener("studydesk:sign-out-settled", onSignOutSettled);
+    };
   }, []);
   // Listen for guest-mode flag changes triggered by AuthGate (set) or the
   // sign-out path below (clear). localStorage doesn't emit change events
@@ -339,6 +417,14 @@ export default function App() {
       requestPullRef.current = null;
       return;
     }
+    // v1.18.1 (StudyDesk#161): a new user id starts from nothing. This effect
+    // re-runs only when the user id changes, and the reset used to happen only
+    // on sign-out, so switching straight from one account to another (a
+    // recovery or magic link opened while signed in) kept the first
+    // account's "pulled" flag and pull stamps until the new pull settled.
+    pulledOnceRef.current = false;
+    setPulledOnce(false);
+    remoteStampsRef.current = null;
     let cancelled = false;
     let lastPullAt = NaN;
     const doPull = async () => {
@@ -909,6 +995,12 @@ export default function App() {
       />
     )}
     {flash&&<div className="flash">{flash}</div>}
+    {accountNotice&&(
+      <div className="flash flash--notice" role="status">
+        <span>{accountNotice}</span>
+        <button type="button" className="flash__close" onClick={()=>setAccountNotice(null)} aria-label={t('common.close')}>×</button>
+      </div>
+    )}
     {/* Item 8 — asks once per account, only inside the account-age window,
         and only once onboarding is out of the way. Guests have no auth
         metadata to write to, so `session?.user` is the whole gate. */}

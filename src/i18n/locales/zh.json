@@ -189,6 +189,7 @@
     "profileSaved": "资料已保存",
     "profileSaveFailed": "无法保存资料：{{msg}}",
     "signOutConfirm": "退出 StudyDesk？你的同步数据保留在云端，重新登录后会重新出现。",
+    "signOutUnsynced_other": "要退出登录吗？此设备上有 {{count}} 项更改尚未同步到云端，将会丢失。",
     "signedOutLocal": "已退出 · 本地模式",
     "signOutFailed": "退出失败：{{msg}}",
     "notSignedIn": "未登录",
@@ -428,7 +429,10 @@
     "updateRestart": "重启以更新",
     "updateDownload": "下载并安装",
     "fdroidCheck": "在 F-Droid 上检查更新",
-    "fdroidCheckNote": "StudyDesk 每天向 f-droid.org 查询一次最新版本，不会发送任何关于你的信息。关闭后将不再发送该请求。"
+    "fdroidCheckNote": "StudyDesk 每天向 f-droid.org 查询一次最新版本，不会发送任何关于你的信息。关闭后将不再发送该请求。",
+    "otherAccountCleared": "你登录了另一个账户，因此上一个账户的数据已从此设备移除。",
+    "otherAccountClearedUnsent_other": "你登录了另一个账户，因此上一个账户的数据已从此设备移除，其中包括 {{count}} 项尚未同步的更改。",
+    "otherTabReloaded": "你在另一个标签页中登录或退出了账户，因此此标签页已重新加载。"
   },
   "sdob": {
     "brand": "别再纠结，开始学习。",

@@ -188,6 +188,7 @@
     "profileSaved": "Profil disimpan",
     "profileSaveFailed": "Gagal menyimpan profil: {{msg}}",
     "signOutConfirm": "Keluar dari StudyDesk? Data yang sudah tersinkron tetap ada di awan dan akan muncul lagi saat kamu masuk kembali.",
+    "signOutUnsynced_other": "Keluar? {{count}} perubahan di perangkat ini belum sampai ke cloud dan akan hilang.",
     "signedOutLocal": "Sudah keluar · mode lokal",
     "signOutFailed": "Gagal keluar: {{msg}}",
     "notSignedIn": "Belum masuk",
@@ -426,7 +427,10 @@
     "updateRestart": "Mulai ulang untuk memperbarui",
     "updateDownload": "Unduh & pasang",
     "fdroidCheck": "Periksa pembaruan di F-Droid",
-    "fdroidCheckNote": "Sekali sehari, StudyDesk menanyakan versi terbaru ke f-droid.org. Tidak ada data tentang Anda yang dikirim. Jika dimatikan, permintaan ini tidak dikirim sama sekali."
+    "fdroidCheckNote": "Sekali sehari, StudyDesk menanyakan versi terbaru ke f-droid.org. Tidak ada data tentang Anda yang dikirim. Jika dimatikan, permintaan ini tidak dikirim sama sekali.",
+    "otherAccountCleared": "Kamu masuk ke akun lain, jadi data akun sebelumnya dihapus dari perangkat ini.",
+    "otherAccountClearedUnsent_other": "Kamu masuk ke akun lain, jadi data akun sebelumnya dihapus dari perangkat ini, termasuk {{count}} perubahan yang belum tersinkron.",
+    "otherTabReloaded": "Kamu masuk atau keluar di tab lain, jadi tab ini dimuat ulang."
   },
   "sdob": {
     "brand": "Berhenti menimbang. Mulai belajar.",
