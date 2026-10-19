@@ -223,6 +223,14 @@ const css = `
 .sv2-linkish{display:inline-block;margin-top:12px;background:none;border:none;padding:0;font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
 .sv2-linkish:hover{color:var(--text);}
 .sv2-kofi-link{margin-top:10px;padding-top:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;}
+/* The Ko-fi email's code field (limecore#55): the sign-in code field's look
+   (mono, spaced digits) at Settings scale, full width like that one. */
+.sv2-code-input{font-size:18px;font-weight:700;letter-spacing:0.3em;text-indent:0.3em;text-align:center;}
+/* Secondary actions under the Ko-fi field sit as a row of the same quiet
+   links as the disclosure itself, so the outlined button stays the one thing
+   to press and the amber button is left meaning "remove". */
+.sv2-kofi-links{display:flex;flex-wrap:wrap;gap:0 18px;}
+.sv2-linkish:disabled{opacity:0.5;cursor:default;text-decoration:none;}
 /* width:auto overrides the width:100% this input now inherits from the
    shared control selector in forms.css. That inheritance is correct for a
    field stacked in an .input-group and wrong for one sitting in a flex row

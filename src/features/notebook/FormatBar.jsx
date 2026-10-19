@@ -15,7 +15,7 @@
 // half ruled lines. A two-row bar takes 26% and is rejected on that basis
 // alone.
 //
-// **Order: B I U ▨ | H1 H2 | • 1. ☐ | ＋.** Character formats first because
+// **Order: B I U highlight | H1 H2 | • 1. ☐ | ＋.** Character formats first because
 // they are used mid-sentence, so the thumb reaches them while reading the
 // line; then blocks; then insert.
 //
@@ -25,11 +25,19 @@
 //
 // **Active state is the glyph going to --nb-ink from --nb-ink-muted.** No
 // pills, no fills — the bar has to sit quietly under a paper page.
+//
+// **On desktop (StudyDesk#113) the same bar sits in the format row** under
+// the note header, portalled there by the editor that holds the caret
+// (formatSlot.js). `inline` restyles it for that row; `idle` is the copy the
+// row shows while nothing is being edited, so the controls can be found
+// before clicking in. Every control's tooltip names its shortcut, and "?"
+// opens the sheet that lists them all (ShortcutSheet.jsx).
 
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BLOCK } from './model.js';
 import { MARK } from './inline.js';
+import { shortcutFor } from './shortcuts.js';
 
 const LONG_PRESS_MS = 450;
 
@@ -43,7 +51,7 @@ const hold = (e) => e.preventDefault();
 // during render is a NEW type on every render, so React unmounts and remounts
 // every button each time — which on this bar means losing the active press
 // mid-tap.
-function Btn({ label, on, onPress, aria }) {
+function Btn({ label, on, onPress, aria, title, inert }) {
   return (
     <button
       type="button"
@@ -52,23 +60,42 @@ function Btn({ label, on, onPress, aria }) {
       onTouchStart={hold}
       onClick={onPress}
       aria-pressed={on || undefined}
+      aria-disabled={inert || undefined}
       aria-label={aria}
+      title={title}
     >
       {label}
     </button>
   );
 }
 
-export default function FormatBar({ activeType, swatchesOpen, onSwatches, onAction, canInsertPhoto = false }) {
+export default function FormatBar({
+  activeType, swatchesOpen, onSwatches, onAction, canInsertPhoto = false,
+  inline = false, idle = false, onHelp,
+}) {
   const { t } = useTranslation();
+  // "Bold (Ctrl+B)". The chord comes from shortcuts.js, which a test holds
+  // to what the keys actually do.
+  const tip = (id, labelKey) => {
+    const keys = shortcutFor(id);
+    return keys ? `${t(labelKey)} (${keys})` : t(labelKey);
+  };
+  // The idle copy is a preview of the controls: visible, labelled, inert.
+  const act = idle ? () => {} : onAction;
   const timer = useRef(0);
   const longFired = useRef(false);
+  // A tap is followed by the browser's compatibility mouse events, and the
+  // highlight runs on both touchend and mouseup, so one tap toggled it twice
+  // (`word========`). Mouse events this soon after a touch are ignored (#128).
+  const touchedAt = useRef(0);
+  const fromTouch = () => Date.now() - touchedAt.current < 800;
   // §4: "one tap applies the LAST-USED role; long-press opens the three-swatch
   // popover." Remembering the role is what makes the single tap worth having —
   // a user marking a page in rose should not reopen the popover every line.
   const lastRole = useRef(1);
 
   const startHl = () => {
+    if (idle) return;
     longFired.current = false;
     timer.current = window.setTimeout(() => {
       longFired.current = true;
@@ -78,13 +105,13 @@ export default function FormatBar({ activeType, swatchesOpen, onSwatches, onActi
   const endHl = () => {
     window.clearTimeout(timer.current);
     if (longFired.current) return;
-    onAction('mark', { mark: MARK.HL, role: lastRole.current });
+    act('mark', { mark: MARK.HL, role: lastRole.current });
   };
 
-  return (
+  const bar = (
     <>
       {swatchesOpen && (
-        <div className="nb-swatches" role="group" aria-label={t('nb.highlightRoles')}>
+        <div className="nb-swatches" role="group" aria-label={t('nb.highlightRoles')} onMouseDown={hold}>
           {[1, 2, 3].map((role) => (
             <button
               key={role}
@@ -103,35 +130,51 @@ export default function FormatBar({ activeType, swatchesOpen, onSwatches, onActi
         </div>
       )}
 
-      <div className="nb-bar" role="toolbar" aria-label={t('nb.formatBar')}>
-        <Btn label="B" aria={t('nb.bold')} onPress={() => onAction('mark', { mark: MARK.BOLD })} />
-        <Btn label="I" aria={t('nb.italic')} onPress={() => onAction('mark', { mark: MARK.ITALIC })} />
-        <Btn label="U" aria={t('nb.underline')} onPress={() => onAction('mark', { mark: MARK.UNDERLINE })} />
+      <div
+        className={`nb-bar${inline ? ' is-inline' : ''}${idle ? ' is-idle' : ''}`}
+        role="toolbar"
+        aria-label={t('nb.formatBar')}
+        // A press between the buttons (a separator, the padding) must not take
+        // focus from the line either, or it closes the editor (#128).
+        onMouseDown={hold}
+      >
+        {/* The idle copy marks each inert control rather than the whole
+            toolbar, which announced the live "?" as disabled too (#130). */}
+        <Btn inert={idle} label="B" aria={t('nb.bold')} title={tip('bold', 'nb.bold')} onPress={() => act('mark', { mark: MARK.BOLD })} />
+        <Btn inert={idle} label="I" aria={t('nb.italic')} title={tip('italic', 'nb.italic')} onPress={() => act('mark', { mark: MARK.ITALIC })} />
+        <Btn inert={idle} label="U" aria={t('nb.underline')} title={tip('underline', 'nb.underline')} onPress={() => act('mark', { mark: MARK.UNDERLINE })} />
         {/* Highlight: tap applies the last role, long-press opens the three
             swatches. No free colour picker (§4) — and no fourth swatch. */}
         <button
           type="button"
           className="nb-bar-btn"
-          onMouseDown={(e) => { hold(e); startHl(); }}
-          onMouseUp={endHl}
+          onMouseDown={(e) => { hold(e); if (!fromTouch()) startHl(); }}
+          onMouseUp={() => { if (!fromTouch()) endHl(); }}
           onMouseLeave={() => window.clearTimeout(timer.current)}
-          onTouchStart={(e) => { hold(e); startHl(); }}
+          onTouchStart={(e) => { touchedAt.current = Date.now(); hold(e); startHl(); }}
           onTouchEnd={endHl}
+          // Enter or Space on the focused button: a click with detail 0. The
+          // pointer paths above already handled every other click (#130).
+          onClick={(e) => { if (e.detail === 0) act('mark', { mark: MARK.HL, role: lastRole.current }); }}
+          aria-disabled={idle || undefined}
           aria-label={t('nb.highlight')}
+          title={tip('highlight', 'nb.highlight')}
         >
-          ▨
+          {/* A letter on the role-1 wash: what a highlight does, not a
+              hatched square that meant nothing (StudyDesk#114). */}
+          <span className="nb-bar-hl-glyph" aria-hidden="true">A</span>
         </button>
 
         <span className="nb-bar-sep" aria-hidden="true" />
 
-        <Btn label="H1" aria={t('nb.h1')} on={activeType === BLOCK.H1} onPress={() => onAction('block', BLOCK.H1)} />
-        <Btn label="H2" aria={t('nb.h2')} on={activeType === BLOCK.H2} onPress={() => onAction('block', BLOCK.H2)} />
+        <Btn inert={idle} label="H1" aria={t('nb.h1')} title={tip('h1', 'nb.h1')} on={activeType === BLOCK.H1} onPress={() => act('block', BLOCK.H1)} />
+        <Btn inert={idle} label="H2" aria={t('nb.h2')} title={tip('h2', 'nb.h2')} on={activeType === BLOCK.H2} onPress={() => act('block', BLOCK.H2)} />
 
         <span className="nb-bar-sep" aria-hidden="true" />
 
-        <Btn label="•" aria={t('nb.bullet')} on={activeType === BLOCK.BULLET} onPress={() => onAction('block', BLOCK.BULLET)} />
-        <Btn label="1." aria={t('nb.numbered')} on={activeType === BLOCK.NUMBER} onPress={() => onAction('block', BLOCK.NUMBER)} />
-        <Btn label="☐" aria={t('nb.checklist')} on={activeType === BLOCK.CHECK} onPress={() => onAction('block', BLOCK.CHECK)} />
+        <Btn inert={idle} label="•" aria={t('nb.bullet')} title={tip('bullet', 'nb.bullet')} on={activeType === BLOCK.BULLET} onPress={() => act('block', BLOCK.BULLET)} />
+        <Btn inert={idle} label="1." aria={t('nb.numbered')} title={tip('numbered', 'nb.numbered')} on={activeType === BLOCK.NUMBER} onPress={() => act('block', BLOCK.NUMBER)} />
+        <Btn inert={idle} label="☐" aria={t('nb.checklist')} title={tip('checklist', 'nb.checklist')} on={activeType === BLOCK.CHECK} onPress={() => act('block', BLOCK.CHECK)} />
 
         <span className="nb-bar-sep" aria-hidden="true" />
 
@@ -140,9 +183,16 @@ export default function FormatBar({ activeType, swatchesOpen, onSwatches, onActi
             rendered a button that did nothing at all — the worst kind of
             affordance. It comes back by itself the day the prop is passed. */}
         {canInsertPhoto && (
-          <Btn label="＋" aria={t('nb.insertPhoto')} onPress={() => onAction('photo')} />
+          <Btn label="＋" aria={t('nb.insertPhoto')} onPress={() => act('photo')} />
         )}
+
+        {/* The way to find out what all of this is, and what the keys are. */}
+        {onHelp && <Btn label="?" aria={t('nb.helpOpen')} title={t('nb.helpOpen')} onPress={onHelp} />}
       </div>
     </>
   );
+
+  // In the desktop row the swatches hang from the bar, not from the bottom of
+  // the window, so they need a positioned wrapper.
+  return inline ? <div className="nb-format-inline">{bar}</div> : bar;
 }

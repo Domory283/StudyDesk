@@ -5,7 +5,8 @@
 // here follows from that one decision: nothing rewrites the element the user
 // is typing into, so an IME's composition is never disturbed.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import Block from './Block.jsx';
 import FormatBar from './FormatBar.jsx';
@@ -18,40 +19,24 @@ import {
 import { useKeyboardInset } from './useKeyboardInset.js';
 import { isComposing, compositionTracking } from '../../lib/imeSubmit.js';
 
-// Desktop shortcuts, §5. Word/Docs conventions, unchanged — people arrive
-// already knowing these and an app that reassigns them is picking a fight it
-// cannot win.
-function matchShortcut(e) {
-  const mod = e.metaKey || e.ctrlKey;
-  if (!mod) return null;
-  const k = e.key.toLowerCase();
+// The shortcut table moved to shortcuts.js (StudyDesk#113), next to the list
+// the format bar's tooltips and the "?" sheet show, so the two cannot drift.
+import { matchShortcut } from './shortcuts.js';
+import { useFormatSlot } from './formatSlot.js';
 
-  if (e.altKey) {
-    if (k === '1') return { kind: 'block', type: BLOCK.H1 };
-    if (k === '2') return { kind: 'block', type: BLOCK.H2 };
-    return null;
-  }
-  if (e.shiftKey) {
-    if (k === 'h') return { kind: 'mark', mark: MARK.HL, role: 1 };
-    if (k === '*' || k === '8') return { kind: 'block', type: BLOCK.BULLET };
-    if (k === '&' || k === '7') return { kind: 'block', type: BLOCK.NUMBER };
-    if (k === '(' || k === '9') return { kind: 'block', type: BLOCK.CHECK };
-    if (k === 'p') return { kind: 'photo' };
-    if (k === 'm') return { kind: 'span', open: '$', close: '$' };
-    if (k === 'e') return { kind: 'span', open: '$$', close: '$$' };
-    return null;
-  }
-  if (k === 'b') return { kind: 'mark', mark: MARK.BOLD };
-  if (k === 'i') return { kind: 'mark', mark: MARK.ITALIC };
-  if (k === 'u') return { kind: 'mark', mark: MARK.UNDERLINE };
-  if (k === '\\') return { kind: 'clear' };
-  // ime-ok: this matcher is pure and is only ever reached from NoteEditor's
-  // keydown, which returns on `isComposing(e, el)` before calling it. It is
-  // also mod-gated — every branch above requires Ctrl/Cmd — so the keystroke
-  // is Ctrl+Enter, not the bare Enter an IME commits with.
-  if (e.key === 'Enter') return { kind: 'toggleCheck' };
-  return null;
+// Counted rather than toggled: moving the caret to another box mounts that
+// box's bar before the first box's editor lets go of its own, so a plain
+// add/remove would drop the class while a bar is still up.
+let dockedBars = 0;
+function holdDockedBar() {
+  dockedBars += 1;
+  document.body.classList.add('nb-editing');
+  return () => {
+    dockedBars = Math.max(0, dockedBars - 1);
+    if (!dockedBars) document.body.classList.remove('nb-editing');
+  };
 }
+
 
 export default function NoteEditor({
   value,
@@ -120,7 +105,12 @@ export default function NoteEditor({
     const el = taRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
+    // Whole line boxes. A face whose glyphs overflow the 28px line (Slate's
+    // Kalam in an H2 measures 29) would otherwise grow the editor by a pixel
+    // and nudge every line below it off the ruling while it is open (#128).
+    const lh = parseFloat(getComputedStyle(el).lineHeight) || el.scrollHeight;
+    el.style.height = `${Math.max(1, Math.round(el.scrollHeight / lh)) * lh}px`;
+    el.scrollTop = 0;
   }, []);
 
   useEffect(() => { autosize(); }, [draft, autosize]);
@@ -130,6 +120,36 @@ export default function NoteEditor({
     const el = taRef.current;
     if (el) { el.focus(); autosize(); }
   }, [focus, autosize]);
+
+  // Where the caret goes in a line that has just been mounted (StudyDesk#129).
+  // A fresh textarea starts with the caret at 0, which in a list put the next
+  // character in FRONT of the new line's `- `: "- item", Enter, "item2" saved
+  // the paragraph "item2- ". Enter, a paste, Backspace-merge and opening a
+  // line all set it here.
+  //
+  // Applied in a layout effect, in the same commit that mounts the line, not
+  // on the next animation frame: a key typed straight after Enter arrived
+  // before the frame and went in at 0 ("more" became "m-ore").
+  const caretTo = useRef(null);
+  const placeCaret = useCallback((offset) => { caretTo.current = offset; }, []);
+  useLayoutEffect(() => {
+    if (caretTo.current === null) return;
+    const el = taRef.current;
+    if (!el) return;
+    const off = Math.max(0, Math.min(caretTo.current, el.value.length));
+    caretTo.current = null;
+    el.setSelectionRange(off, off);
+  });
+
+  // A line opened by a tap or click gets its caret at the END, where carrying
+  // on writing starts, instead of at 0 in front of its own source (#132).
+  const openLine = useCallback((i) => {
+    // Already open: leave its caret alone. Setting one here would be held
+    // until some later render and land mid-word then (#128 review).
+    if (i === focus) return;
+    setFocus(i);
+    placeCaret(Number.MAX_SAFE_INTEGER);
+  }, [focus, placeCaret]);
 
   // ── Committing ──────────────────────────────────────────────────────────
   //
@@ -259,7 +279,9 @@ export default function NoteEditor({
     if (split) {
       commit(split.blocks, split.focus);
       // Not setDraft(text) — the focus change re-syncs the draft to the last
-      // pasted block, which is where the caret now is.
+      // pasted block, which is where the caret now is: at the end of what was
+      // pasted, ahead of whatever followed the caret before the paste.
+      placeCaret(caret - text.lastIndexOf('\n', caret - 1) - 1);
       pendingUndo.current = null;
       return;
     }
@@ -284,7 +306,7 @@ export default function NoteEditor({
     // is dropped — otherwise typing a list item and then Backspacing to the
     // start of it would surprise them by dissolving the bullet they wanted.
     pendingUndo.current = null;
-  }, [blocks, focus, onChange, commit]);
+  }, [blocks, focus, onChange, commit, placeCaret]);
 
   // ── Keys ────────────────────────────────────────────────────────────────
 
@@ -402,6 +424,10 @@ export default function NoteEditor({
         text: parse(tail)[0].text,
       });
       commit(next, focus + 1);
+      // Right after the new line's marker: the start of anything the split
+      // carried down with it.
+      const moved = next[focus + 1];
+      placeCaret(serializeBlock(moved).length - moved.text.length);
       return;
     }
 
@@ -452,13 +478,7 @@ export default function NoteEditor({
         all.splice(focus, 1);
         commit(all, focus - 1);
         setDraft(serializeBlock(prev));
-        requestAnimationFrame(() => {
-          const el2 = taRef.current;
-          if (el2) {
-            const off = serializeBlock(prev).length - prev.text.length + caret;
-            el2.setSelectionRange(off, off);
-          }
-        });
+        placeCaret(serializeBlock(prev).length - prev.text.length + caret);
       }
       return;
     }
@@ -466,16 +486,23 @@ export default function NoteEditor({
     // Arrow out of the top / bottom of a block moves to the neighbour, which
     // is what makes the page feel like one document rather than a stack of
     // fields.
-    if (e.key === 'ArrowUp' && at === 0 && focus > 0) {
+    // A one-line block is left by ArrowUp/ArrowDown from anywhere in it: with
+    // the caret at the end (#132), ArrowUp first went to column 0 and needed a
+    // second press. A wrapped block keeps the rule of its first/last offset.
+    const oneLine = () => {
+      const lh = parseFloat(getComputedStyle(e.target).lineHeight) || 0;
+      return lh > 0 && e.target.clientHeight <= lh * 1.5;
+    };
+    if (e.key === 'ArrowUp' && (at === 0 || oneLine()) && focus > 0) {
       e.preventDefault();
       commitDraft(draft, focus - 1);
       return;
     }
-    if (e.key === 'ArrowDown' && at === draft.length && focus < blocks.length - 1) {
+    if (e.key === 'ArrowDown' && (at === draft.length || oneLine()) && focus < blocks.length - 1) {
       e.preventDefault();
       commitDraft(draft, focus + 1);
     }
-  }, [draft, blocks, focus, commit, commitDraft, onChange, onInsertPhoto]);
+  }, [draft, blocks, focus, commit, commitDraft, onChange, onInsertPhoto, placeCaret]);
 
   // ── Bar actions ─────────────────────────────────────────────────────────
 
@@ -534,7 +561,7 @@ export default function NoteEditor({
         // is about to mount, and the editor closes inside the same click.
         if (e.target === e.currentTarget && blocks.length) {
           e.preventDefault();
-          setFocus(blocks.length - 1);
+          openLine(blocks.length - 1);
         }
       }}>
         {blocks.map((b, i) => (
@@ -570,7 +597,7 @@ export default function NoteEditor({
               block={b}
               index={i}
               number={numbers.get(i)}
-              onFocus={setFocus}
+              onFocus={openLine}
               onToggleCheck={(idx) => {
                 const next = [...blocks];
                 next[idx] = { ...next[idx], checked: !next[idx].checked };
@@ -587,6 +614,19 @@ export default function NoteEditor({
   // The bar is rendered by whichever editor holds the caret, and `focus >= 0`
   // is true in at most one of them — so a page of twenty boxes still has one
   // docked bar, not twenty stacked.
+  //
+  // On desktop it goes into the notebook's format row instead of docking
+  // (StudyDesk#113, formatSlot.js), and the row is told, so it can hide its
+  // idle copy for as long as this live one is there.
+  const fmt = useFormatSlot();
+  const slot = fmt?.slot ?? null;
+  const holdEditing = fmt?.holdEditing;
+  const editingHere = focus >= 0;
+  useEffect(
+    () => (slot && editingHere && holdEditing ? holdEditing() : undefined),
+    [slot, editingHere, holdEditing],
+  );
+
   const bar = focus >= 0 ? (
     <FormatBar
       activeType={currentType}
@@ -595,14 +635,27 @@ export default function NoteEditor({
       onSwatches={setSwatches}
       onAction={applyFromBar}
       canInsertPhoto={typeof onInsertPhoto === 'function'}
+      inline={!!slot}
+      onHelp={fmt?.openHelp}
     />
   ) : null;
+  // On a phone the bar docks to the window, so it is portalled to <body>
+  // (StudyDesk#127). Rendered in place it was a child of `.nb-box`, whose
+  // `z-index` makes a stacking context: the bar's own z-index then counted
+  // only inside the box, and the app's tab bar painted over it.
+  const placedBar = bar ? createPortal(bar, slot || document.body) : null;
+
+  // The tab bar steps aside while a line is being edited on a narrow screen,
+  // the way Lock In hides it: the docked bar takes the bottom edge, and over a
+  // taller tab bar the tab icons would show above it.
+  const docked = focus >= 0 && !slot;
+  useEffect(() => (docked ? holdDockedBar() : undefined), [docked]);
 
   if (embedded) {
     return (
       <div className="nb-box-body" aria-label={ariaLabel}>
         {page}
-        {bar}
+        {placedBar}
       </div>
     );
   }
@@ -610,7 +663,7 @@ export default function NoteEditor({
   return (
     <div className="nb-page-wrap">
       {page}
-      {bar}
+      {placedBar}
     </div>
   );
 }

@@ -20,11 +20,27 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Trash2 } from 'lucide-react';
 import NotebookTree from './NotebookTree.jsx';
 import NoteCanvas from './NoteCanvas.jsx';
+import FormatBar from './FormatBar.jsx';
+import ShortcutSheet from './ShortcutSheet.jsx';
+import { FormatSlotContext, useMediaQuery, WIDE } from './formatSlot.js';
 import { readLayout, writeLayout, isUnarranged } from './layout.js';
 import TimerPill from '../timer/TimerPill.jsx';
 import { readTimerSnapshot, subscribeTimer } from '../../lib/timerSnapshot.js';
+import { fmtTime, fmtDate, fmtDateFull, toLocalISO } from '../../lib/dates.js';
+
+// "Edited 14:30" today, "Edited 3 Oct" this year, the full date before that.
+// The header used a bare `toLocaleString()`, seconds included, which read as a
+// log line rather than a note's date (StudyDesk#114).
+function editedLabel(iso, now = new Date()) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  if (d.toDateString() === now.toDateString()) return fmtTime(iso);
+  const day = toLocalISO(d);
+  return d.getFullYear() === now.getFullYear() ? fmtDate(day) : fmtDateFull(day);
+}
 
 function newId() {
   try {
@@ -38,8 +54,28 @@ function newId() {
   });
 }
 
-export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTimer }) {
+export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTimer, onNoteOpenChange }) {
   const { t } = useTranslation();
+
+  // The desktop format row and the "?" sheet (StudyDesk#113, formatSlot.js).
+  const wide = useMediaQuery(WIDE);
+  const [slotEl, setSlotEl] = useState(null);
+  // How many editors hold the row, not a flag: moving the caret from box A to
+  // box B mounts B's bar before A lets go, and A's "false" then landed after
+  // B's "true", showing the idle copy beside the live bar (#130).
+  const [editors, setEditors] = useState(0);
+  const editing = editors > 0;
+  const holdEditing = useCallback(() => {
+    setEditors((n) => n + 1);
+    return () => setEditors((n) => Math.max(0, n - 1));
+  }, []);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const openHelp = useCallback(() => setHelpOpen(true), []);
+  const closeHelp = useCallback(() => setHelpOpen(false), []);
+  const formatSlot = useMemo(
+    () => ({ slot: wide ? slotEl : null, holdEditing, openHelp }),
+    [wide, slotEl, holdEditing, openHelp],
+  );
 
   const courses = useMemo(
     () => Object.values(state.courses || {}).filter((c) => c && !c.deletedAt && !c.archivedAt),
@@ -210,6 +246,31 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
   // empty page with the list one tap away but nothing saying so.
   const showList = browsing || !active;
 
+  // Told to the app shell, which on a phone gives a note the screen: the Timer
+  // sub-tabs step aside while one is open (StudyDesk#114). "All notes" is the
+  // way back, and leaving the notebook resets it.
+  useEffect(() => {
+    onNoteOpenChange?.(!showList);
+  }, [showList, onNoteOpenChange]);
+  useEffect(() => () => onNoteOpenChange?.(false), [onNoteOpenChange]);
+
+  const formatRow = wide && active ? (
+    <div className="nb-format-row">
+      <div className="nb-format-slot" ref={setSlotEl} />
+      {!editing && (
+        <FormatBar
+          idle
+          inline
+          activeType={null}
+          swatchesOpen={false}
+          onSwatches={() => {}}
+          onAction={() => {}}
+          onHelp={openHelp}
+        />
+      )}
+    </div>
+  ) : null;
+
   return (
     <div className={`nb${showList ? ' is-list' : ''}`}>
       <NotebookTree
@@ -263,9 +324,11 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
               </select>
             </label>
           )}
-          {active?.updatedAt && (
+          {/* Not on a note with nothing in it yet: creating one stamps it, and
+              "Edited" on a blank page claims an edit nobody made. */}
+          {active?.updatedAt && String(active.content || '').trim() && editedLabel(active.updatedAt) && (
             <span className="nb-head-meta nb-head-meta-edited">
-              {t('nb.edited', { when: new Date(active.updatedAt).toLocaleString() })}
+              {t('nb.edited', { when: editedLabel(active.updatedAt) })}
             </span>
           )}
           {/* §3: "Saved to session · 20 Mar 14:22" as a meta line. Shown only
@@ -275,6 +338,11 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
             <span className="nb-head-meta">{t('nb.savedToSession')}</span>
           )}
           <span className="nb-head-spacer" />
+          {/* Desktop: the format controls share the header's line rather than
+              taking a row of their own under it (StudyDesk#114). The editor
+              holding the caret portals its live bar into the slot; until one
+              does, an idle copy shows the controls. */}
+          {formatRow}
           {/* Delete. Confirmed, because a note is the one thing in this app
               with no undo — the editor's history is per-block and does not
               survive the note being unmounted. */}
@@ -288,7 +356,9 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
               aria-label={t('nb.delete')}
               title={t('nb.delete')}
             >
-              ×
+              {/* A bin, not ×: a cross reads as "close", and here it deleted
+                  the note (StudyDesk#114). */}
+              <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
             </button>
           )}
           {/* The corner pill. The EXISTING component at its existing size,
@@ -298,11 +368,13 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
         </header>
 
         {active ? (
-          <NoteCanvas
-            key={active.id}
-            boxes={boxes}
-            onChange={updateBoxes}
-          />
+          <FormatSlotContext.Provider value={formatSlot}>
+            <NoteCanvas
+              key={active.id}
+              boxes={boxes}
+              onChange={updateBoxes}
+            />
+          </FormatSlotContext.Provider>
         ) : (
           <div className="nb-empty">
             <p>{t('nb.emptyTitle')}</p>
@@ -311,6 +383,7 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
             </button>
           </div>
         )}
+        {helpOpen && <ShortcutSheet onClose={closeHelp} />}
       </div>
     </div>
   );
