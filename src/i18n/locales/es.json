@@ -190,6 +190,9 @@
     "profileSaved": "Perfil guardado",
     "profileSaveFailed": "No se pudo guardar el perfil: {{msg}}",
     "signOutConfirm": "¿Cerrar sesión en StudyDesk? Tus datos sincronizados permanecen en la nube y reaparecerán cuando vuelvas a iniciar sesión.",
+    "signOutUnsynced_one": "¿Cerrar sesión? 1 cambio en este dispositivo aún no ha llegado a la nube y se perderá.",
+    "signOutUnsynced_many": "¿Cerrar sesión? {{count}} cambios en este dispositivo aún no han llegado a la nube y se perderán.",
+    "signOutUnsynced_other": "¿Cerrar sesión? {{count}} cambios en este dispositivo aún no han llegado a la nube y se perderán.",
     "signedOutLocal": "Sesión cerrada · modo local",
     "signOutFailed": "Error al cerrar sesión: {{msg}}",
     "notSignedIn": "Sin sesión iniciada",
@@ -430,7 +433,12 @@
     "updateRestart": "Reiniciar para actualizar",
     "updateDownload": "Descargar e instalar",
     "fdroidCheck": "Buscar actualizaciones en F-Droid",
-    "fdroidCheckNote": "Una vez al día, StudyDesk consulta en f-droid.org cuál es la versión más reciente. No se envía nada sobre ti. Si lo desactivas, la consulta no se hace en absoluto."
+    "fdroidCheckNote": "Una vez al día, StudyDesk consulta en f-droid.org cuál es la versión más reciente. No se envía nada sobre ti. Si lo desactivas, la consulta no se hace en absoluto.",
+    "otherAccountCleared": "Iniciaste sesión con otra cuenta, así que los datos de la cuenta anterior se eliminaron de este dispositivo.",
+    "otherAccountClearedUnsent_one": "Iniciaste sesión con otra cuenta, así que los datos de la cuenta anterior se eliminaron de este dispositivo, incluido {{count}} cambio sin sincronizar.",
+    "otherAccountClearedUnsent_many": "Iniciaste sesión con otra cuenta, así que los datos de la cuenta anterior se eliminaron de este dispositivo, incluidos {{count}} cambios sin sincronizar.",
+    "otherAccountClearedUnsent_other": "Iniciaste sesión con otra cuenta, así que los datos de la cuenta anterior se eliminaron de este dispositivo, incluidos {{count}} cambios sin sincronizar.",
+    "otherTabReloaded": "Iniciaste o cerraste sesión en otra pestaña, así que esta pestaña se recargó."
   },
   "sdob": {
     "brand": "Deja de decidir. Empieza a estudiar.",
@@ -764,8 +772,9 @@
       "assignmentAdded": "Tarea añadida",
       "examAdded": "Examen añadido",
       "logged": "Registrado {{n}} min",
-      "syncedLegacy": "{{n}} elementos antiguos sincronizados",
-      "syncedFailed": "{{pushed}} sincronizados, {{failed}} fallidos — se reintentará"
+      "queuedLegacy_one": "{{count}} pendiente antiguo esperando sincronización",
+      "queuedLegacy_many": "{{count}} pendientes antiguos esperando sincronización",
+      "queuedLegacy_other": "{{count}} pendientes antiguos esperando sincronización"
     }
   },
   "widget": {
@@ -1121,7 +1130,7 @@
       "http": "El servidor devolvió un error.",
       "network": "No se pudo acceder a esa dirección."
     },
-    "repeatingNote": "{{count}} evento repetido importado como una sola fecha",
+    "repeatingNote_one": "{{count}} evento repetido importado como una sola fecha",
     "repeatingNote_other": "{{count}} eventos repetidos importados como una sola fecha cada uno"
   },
   "att": {

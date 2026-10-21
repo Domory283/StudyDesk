@@ -189,6 +189,8 @@
     "profileSaved": "Profil gespeichert",
     "profileSaveFailed": "Profil konnte nicht gespeichert werden: {{msg}}",
     "signOutConfirm": "Von StudyDesk abmelden? Deine synchronisierten Daten bleiben in der Cloud und erscheinen wieder, wenn du dich erneut anmeldest.",
+    "signOutUnsynced_one": "Abmelden? 1 Änderung auf diesem Gerät ist noch nicht in der Cloud und geht verloren.",
+    "signOutUnsynced_other": "Abmelden? {{count}} Änderungen auf diesem Gerät sind noch nicht in der Cloud und gehen verloren.",
     "signedOutLocal": "Abgemeldet · lokaler Modus",
     "signOutFailed": "Abmeldung fehlgeschlagen: {{msg}}",
     "notSignedIn": "Nicht angemeldet",
@@ -428,7 +430,11 @@
     "updateRestart": "Neu starten und aktualisieren",
     "updateDownload": "Herunterladen & installieren",
     "fdroidCheck": "Auf F-Droid nach Updates suchen",
-    "fdroidCheckNote": "Einmal am Tag fragt StudyDesk bei f-droid.org nach der neuesten Version. Über dich wird nichts gesendet. Ausgeschaltet unterbleibt die Anfrage ganz."
+    "fdroidCheckNote": "Einmal am Tag fragt StudyDesk bei f-droid.org nach der neuesten Version. Über dich wird nichts gesendet. Ausgeschaltet unterbleibt die Anfrage ganz.",
+    "otherAccountCleared": "Du hast dich mit einem anderen Konto angemeldet, daher wurden die Daten des vorherigen Kontos von diesem Gerät entfernt.",
+    "otherAccountClearedUnsent_one": "Du hast dich mit einem anderen Konto angemeldet, daher wurden die Daten des vorherigen Kontos von diesem Gerät entfernt, darunter {{count}} nicht synchronisierte Änderung.",
+    "otherAccountClearedUnsent_other": "Du hast dich mit einem anderen Konto angemeldet, daher wurden die Daten des vorherigen Kontos von diesem Gerät entfernt, darunter {{count}} nicht synchronisierte Änderungen.",
+    "otherTabReloaded": "Du hast dich in einem anderen Tab an- oder abgemeldet, daher wurde dieser Tab neu geladen."
   },
   "sdob": {
     "brand": "Schluss mit Grübeln. Fang an zu lernen.",
@@ -759,8 +765,8 @@
       "assignmentAdded": "Aufgabe hinzugefügt",
       "examAdded": "Prüfung hinzugefügt",
       "logged": "{{n}} Min erfasst",
-      "syncedLegacy": "{{n}} Altdaten synchronisiert",
-      "syncedFailed": "{{pushed}} synchronisiert, {{failed}} fehlgeschlagen — wird wiederholt"
+      "queuedLegacy_one": "{{count}} älteres To-do wartet auf Synchronisierung",
+      "queuedLegacy_other": "{{count}} ältere To-dos warten auf Synchronisierung"
     }
   },
   "widget": {
@@ -1116,7 +1122,7 @@
       "http": "Der Server meldete einen Fehler.",
       "network": "Diese Adresse war nicht erreichbar."
     },
-    "repeatingNote": "{{count}} wiederkehrender Termin als einzelnes Datum importiert",
+    "repeatingNote_one": "{{count}} wiederkehrender Termin als einzelnes Datum importiert",
     "repeatingNote_other": "{{count}} wiederkehrende Termine als je ein einzelnes Datum importiert"
   },
   "att": {
