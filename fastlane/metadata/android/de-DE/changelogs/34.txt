@@ -1,0 +1,3 @@
+Korrekturen und Zuverlässigkeit.
+
+Der Notenschnitt funktioniert mit eigenen Notenskalen und Kursen ohne Credits. Eine Prüfung ohne Datum bringt Plan nicht mehr zum Absturz. StudyDesk startet und meldet sich offline ab und zeigt, welche ungesendeten Änderungen verloren gingen. Ein Kontowechsel beginnt sauber. Gelöschte Anwesenheit, archivierte Semester und Änderungen bei falscher Geräteuhr werden korrekt synchronisiert. Wer sein Konto löscht, löscht auch seine Dateien.

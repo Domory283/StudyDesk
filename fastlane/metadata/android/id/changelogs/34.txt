@@ -1,0 +1,3 @@
+Perbaikan dan keandalan.
+
+IPK berfungsi dengan skala nilai kustom dan mata kuliah tanpa SKS. Ujian tanpa tanggal tidak lagi membuat Rencana macet. StudyDesk dapat dibuka dan keluar akun saat offline, serta memberi tahu perubahan belum terkirim yang akan hilang. Berganti akun dimulai dari awal yang bersih. Kehadiran yang dihapus, semester yang diarsipkan, dan perubahan dengan jam perangkat yang salah kini tersinkron dengan benar. Menghapus akun juga menghapus file Anda.

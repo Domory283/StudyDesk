@@ -1,0 +1,3 @@
+Correcciones y fiabilidad.
+
+El promedio funciona con escalas de notas personalizadas y cursos sin créditos. Un examen sin fecha ya no bloquea Plan. StudyDesk arranca y cierra sesión sin conexión, y avisa de los cambios sin enviar que se perderían. Cambiar de cuenta empieza de cero. La asistencia borrada, los semestres archivados y los cambios hechos con el reloj mal se sincronizan bien. Eliminar tu cuenta también elimina tus archivos.
