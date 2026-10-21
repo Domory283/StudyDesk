@@ -11,18 +11,28 @@
 import { supabase } from './supabase.js';
 import { selectAll } from './selectAll.js';
 import { pushStamp, recordPull } from './editStamp.js';
+import { stampNow } from './serverClock.js';
 import { dueTimeToSql } from './dueAt.js';
+import { toLocalISO } from './dates.js';
+import { isPageStale } from './deviceOwner.js';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 async function currentUserId() {
+  // v1.18.1 (StudyDesk#169): every read and write passes through here. A tab
+  // whose local data another tab wiped holds the previous account's rows,
+  // while the session in shared storage is already the next account's.
+  if (isPageStale()) throw new Error('another tab replaced the local data; this tab is reloading');
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not signed in');
   return user.id;
 }
 
-function nowISO() { return new Date().toISOString(); }
-function todayISO() { return new Date().toISOString().slice(0, 10); }
+// v1.18.1 (StudyDesk#144): server time; see serverClock.js.
+function nowISO() { return stampNow(); }
+// v1.18.1 (StudyDesk#151): the LOCAL calendar date. toISOString() gave the UTC
+// one: yesterday in Auckland before noon, tomorrow in New York after 20:00.
+function todayISO() { return toLocalISO(new Date()); }
 
 // ── retention (v1.12 Item 0) ─────────────────────────────────────────────────
 
@@ -52,9 +62,11 @@ export async function recordAppOpen({ app, appVersion, platform, openedOn }) {
 
 // ── subjects (courses) ───────────────────────────────────────────────────────
 
-export async function upsertSubject({ id, name, credits, semester, color, archivedAt, schoolYear, updatedAt }) {
+// `insertOnly` (v1.18.1, StudyDesk#145) creates the row if the server lacks
+// it and leaves an existing row untouched; see setArchivedAt.
+export async function upsertSubject({ id, name, credits, semester, color, archivedAt, schoolYear, updatedAt }, { insertOnly = false } = {}) {
   const userId = await currentUserId();
-  const { error } = await supabase.from('subjects').upsert({
+  const row = {
     id,
     user_id: userId,
     name,
@@ -74,7 +86,10 @@ export async function upsertSubject({ id, name, credits, semester, color, archiv
     // about it (e.g. NCC, the add-course path) won't clobber an existing value.
     ...(schoolYear !== undefined ? { school_year: schoolYear } : {}),
     updated_at: pushStamp(updatedAt),
-  });
+  };
+  const { error } = insertOnly
+    ? await supabase.from('subjects').upsert(row, { onConflict: 'id', ignoreDuplicates: true })
+    : await supabase.from('subjects').upsert(row);
   if (error) throw error;
   return id;
 }
@@ -91,24 +106,12 @@ export async function upsertSubject({ id, name, credits, semester, color, archiv
  * confirmation. Caller is responsible for dispatching the corresponding
  * local reducer action first (instant feedback).
  */
-export async function archiveSemester(courses, semester) {
-  const stamp = nowISO();
+export async function archiveSemester(courses, semester, stamp) {
+  const archivedAt = stamp || nowISO();
   const targets = Object.values(courses || {}).filter(
     (c) => !c.deletedAt && !c.archivedAt && c.semester === semester,
   );
-  const results = await Promise.allSettled(
-    targets.map((c) =>
-      upsertSubject({
-        id: c.id,
-        name: c.name,
-        credits: c.credits,
-        semester: c.semester,
-        schoolYear: c.schoolYear,
-        color: c.color,
-        archivedAt: stamp,
-      }),
-    ),
-  );
+  const results = await Promise.allSettled(targets.map((c) => setArchivedAt(c, archivedAt)));
   const failed = results.filter((r) => r.status === 'rejected').length;
   return { archived: targets.length - failed, failed };
 }
@@ -121,21 +124,44 @@ export async function restoreSemester(courses, semester) {
   const targets = Object.values(courses || {}).filter(
     (c) => !c.deletedAt && c.archivedAt && c.semester === semester,
   );
-  const results = await Promise.allSettled(
-    targets.map((c) =>
-      upsertSubject({
-        id: c.id,
-        name: c.name,
-        credits: c.credits,
-        semester: c.semester,
-        schoolYear: c.schoolYear,
-        color: c.color,
-        archivedAt: null,
-      }),
-    ),
-  );
+  const results = await Promise.allSettled(targets.map((c) => setArchivedAt(c, null)));
   const failed = results.filter((r) => r.status === 'rejected').length;
   return { restored: targets.length - failed, failed };
+}
+
+// v1.18.1 (StudyDesk#145): an archive or restore changes ONE column. It used
+// to upsert the whole course from the snapshot taken when the user pressed
+// the button, stamped at push time: archived offline at 10:00, renamed on
+// another device at 11:00, back online at 12:00, and the 10:00 name went up
+// as the newest version and the rename was lost everywhere. Now only
+// archived_at is written, so the other columns keep whatever the server has.
+// The push-time stamp lets the archive itself land over an older row. A
+// course the server has never seen (created offline, its own push still
+// queued or failed) gets the whole row instead.
+//
+// That fallback is INSERT-only. The update affects 0 rows when the row is
+// missing, but also when set_updated_at() declined it (the stored row is
+// newer) and when zz_skip_noop_update dropped it (archived_at already had
+// this value). A plain upsert of the snapshot then overwrote the newer row,
+// rename and all, which is the loss this function exists to prevent.
+async function setArchivedAt(course, archivedAt) {
+  const { data, error } = await supabase
+    .from('subjects')
+    .update({ archived_at: archivedAt, updated_at: pushStamp() })
+    .eq('id', course.id)
+    .select('id');
+  if (error) throw error;
+  if (data && data.length > 0) return course.id;
+  return upsertSubject({
+    id: course.id,
+    name: course.name,
+    credits: course.credits,
+    semester: course.semester,
+    schoolYear: course.schoolYear,
+    color: course.color,
+    archivedAt,
+    updatedAt: course.updatedAt,
+  }, { insertOnly: true });
 }
 
 export async function deleteSubject(id) {
@@ -271,7 +297,8 @@ export async function deleteStudySession(id) {
 // ROW — for every record of that kind, not just the ones using the feature.
 // `20260911_notebook_layout.sql` documents that trap as a warning to read
 // carefully. A warning is not a mechanism, and the two v1.14 migrations below
-// it are both unapplied at the time of writing.
+// it were both unapplied when this was written. (Both are applied now, checked
+// 2026-10-13 for limecore#63; the fallback stays for the next new column.)
 //
 // So: send everything, and if the database says it does not know a column,
 // drop exactly the ones this call declared optional and try once more. The
@@ -308,7 +335,7 @@ export async function upsertAssignment({ id, courseId, title, type, dueDate, due
     // The local model stores an empty string when the user clears the date;
     // `date` columns reject '' but accept null.
     due_date: dueDate || null,
-    // v1.14 Item 5 — pending 20260912_assignment_due_time.sql.
+    // v1.14 Item 5 — from 20260912_assignment_due_time.sql (applied).
     due_time: dueTimeToSql(dueTime),
     notes: notes || null,
     done: Boolean(done),
@@ -454,7 +481,8 @@ export async function upsertPlannedSession({ id, subjectId, startsAt, durationMi
   row.dismissed_at = dismissedAt || null;
   if (row.fulfilled_by && row.dismissed_at) row.dismissed_at = null;
   // v1.14 Item 7a — which repeating plan this block was materialised from, or
-  // null for a one-off. Optional below, pending 20260913_planned_series_id.sql.
+  // null for a one-off. Optional below; from 20260913_planned_series_id.sql
+  // (applied).
   row.series_id = seriesId || null;
   await upsertTolerant('planned_sessions', row, ['series_id']);
   return id;
@@ -540,8 +568,8 @@ export async function upsertTimetableEntry({ id, termId, subjectId, title, weekd
     // already means, so no backfill and no special case on read.
     week_parity: weekParity === 1 || weekParity === 2 ? weekParity : null,
     // v1.14 Item 6a — which multi-weekday set this lesson belongs to, or null
-    // for a lesson that meets on one day. Optional below, pending
-    // 20260913_timetable_series_id.sql.
+    // for a lesson that meets on one day. Optional below; from
+    // 20260913_timetable_series_id.sql (applied).
     series_id: seriesId || null,
     updated_at: pushStamp(updatedAt),
   }, ['series_id']);
@@ -783,11 +811,25 @@ export async function upsertAttendance({ timetableEntryId, date, status, note, u
   if (error) throw error;
 }
 
-export async function deleteAttendance(id) {
-  const { error } = await supabase
-    .from('lesson_attendance')
-    .update({ deleted_at: nowISO(), updated_at: nowISO() })
-    .eq('id', id);
+export async function deleteAttendance({ id, timetableEntryId, date, updatedAt }) {
+  // v1.18.1 (StudyDesk#143). Two things were wrong here:
+  //  - It matched on `id`, but upsertAttendance never sends one (see above):
+  //    the server row keeps the id of whichever device inserted it first. So
+  //    clearing a lesson this device marked matched nothing, reported success,
+  //    and the server stayed marked. Delete by the natural key instead, as the
+  //    upsert writes by it. Items queued by an older build carry only `id`.
+  //  - It was stamped when the drain SENT it, so a mark-clear-mark cycle made
+  //    offline had a delete newer than the final re-mark, and the server
+  //    declined the re-mark. The outbox now stamps the edit (editStamp).
+  const stamp = pushStamp(updatedAt);
+  let q = supabase.from('lesson_attendance').update({ deleted_at: stamp, updated_at: stamp });
+  if (timetableEntryId && date) {
+    const userId = await currentUserId();
+    q = q.eq('user_id', userId).eq('timetable_entry_id', timetableEntryId).eq('date', date);
+  } else {
+    q = q.eq('id', id);
+  }
+  const { error } = await q;
   if (error) throw error;
   return id;
 }

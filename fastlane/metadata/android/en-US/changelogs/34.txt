@@ -1,0 +1,3 @@
+Fixes and reliability.
+
+GPA works with custom grade scales and courses without credits. An exam without a date no longer crashes Plan. StudyDesk starts and signs out offline, and tells you which unsent changes would be lost. Switching accounts starts clean. Cleared attendance, archived semesters and edits made with a wrong device clock now sync correctly. Deleting your account also deletes your files.

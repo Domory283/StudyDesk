@@ -189,6 +189,8 @@
     "profileSaved": "Profiili tallennettu",
     "profileSaveFailed": "Profiilin tallennus epäonnistui: {{msg}}",
     "signOutConfirm": "Kirjaudutaanko ulos StudyDeskistä? Synkronoidut tietosi säilyvät pilvessä ja palaavat kun kirjaudut takaisin.",
+    "signOutUnsynced_one": "Kirjaudutaanko ulos? 1 muutos tällä laitteella ei ole vielä pilvessä ja menetetään.",
+    "signOutUnsynced_other": "Kirjaudutaanko ulos? {{count}} muutosta tällä laitteella ei ole vielä pilvessä ja ne menetetään.",
     "signedOutLocal": "Kirjauduttu ulos · paikallinen tila",
     "signOutFailed": "Uloskirjautuminen epäonnistui: {{msg}}",
     "notSignedIn": "Ei kirjautunut",
@@ -428,7 +430,11 @@
     "updateRestart": "Käynnistä uudelleen ja päivitä",
     "updateDownload": "Lataa ja asenna",
     "fdroidCheck": "Tarkista päivitykset F-Droidista",
-    "fdroidCheckNote": "StudyDesk kysyy kerran päivässä f-droid.orgilta uusinta versiota. Sinusta ei lähetetä mitään. Kun tämä on pois päältä, kyselyä ei tehdä lainkaan."
+    "fdroidCheckNote": "StudyDesk kysyy kerran päivässä f-droid.orgilta uusinta versiota. Sinusta ei lähetetä mitään. Kun tämä on pois päältä, kyselyä ei tehdä lainkaan.",
+    "otherAccountCleared": "Kirjauduit toiselle tilille, joten edellisen tilin tiedot poistettiin tältä laitteelta.",
+    "otherAccountClearedUnsent_one": "Kirjauduit toiselle tilille, joten edellisen tilin tiedot poistettiin tältä laitteelta, mukaan lukien {{count}} synkronoimaton muutos.",
+    "otherAccountClearedUnsent_other": "Kirjauduit toiselle tilille, joten edellisen tilin tiedot poistettiin tältä laitteelta, mukaan lukien {{count}} synkronoimatonta muutosta.",
+    "otherTabReloaded": "Kirjauduit sisään tai ulos toisessa välilehdessä, joten tämä välilehti ladattiin uudelleen."
   },
   "sdob": {
     "brand": "Lopeta miettiminen. Aloita opiskelu.",
@@ -759,8 +765,8 @@
       "assignmentAdded": "Tehtävä lisätty",
       "examAdded": "Koe lisätty",
       "logged": "Kirjattu {{n}} min",
-      "syncedLegacy": "Synkronoitu {{n}} vanhaa kohdetta",
-      "syncedFailed": "{{pushed}} synkronoitu, {{failed}} epäonnistui — yritetään uudelleen"
+      "queuedLegacy_one": "{{count}} vanha tehtävälistan kohta odottaa synkronointia",
+      "queuedLegacy_other": "{{count}} vanhaa tehtävälistan kohtaa odottaa synkronointia"
     }
   },
   "widget": {
@@ -1116,7 +1122,7 @@
       "http": "Palvelin palautti virheen.",
       "network": "Osoitteeseen ei saatu yhteyttä."
     },
-    "repeatingNote": "{{count}} toistuva tapahtuma tuotiin yhtenä päivänä",
+    "repeatingNote_one": "{{count}} toistuva tapahtuma tuotiin yhtenä päivänä",
     "repeatingNote_other": "{{count}} toistuvaa tapahtumaa tuotiin kukin yhtenä päivänä"
   },
   "att": {

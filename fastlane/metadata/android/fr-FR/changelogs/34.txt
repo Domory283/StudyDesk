@@ -1,0 +1,3 @@
+Corrections et fiabilité.
+
+La moyenne fonctionne avec les barèmes personnalisés et les cours sans crédits. Un examen sans date ne fait plus planter Plan. StudyDesk démarre et se déconnecte hors ligne, en indiquant les modifications non envoyées qui seraient perdues. Changer de compte repart de zéro. Présences effacées, semestres archivés et modifications faites avec une horloge fausse se synchronisent correctement. Supprimer votre compte supprime aussi vos fichiers.

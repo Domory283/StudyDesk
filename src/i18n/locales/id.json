@@ -188,6 +188,7 @@
     "profileSaved": "Profil disimpan",
     "profileSaveFailed": "Gagal menyimpan profil: {{msg}}",
     "signOutConfirm": "Keluar dari StudyDesk? Data yang sudah tersinkron tetap ada di awan dan akan muncul lagi saat kamu masuk kembali.",
+    "signOutUnsynced_other": "Keluar? {{count}} perubahan di perangkat ini belum sampai ke cloud dan akan hilang.",
     "signedOutLocal": "Sudah keluar · mode lokal",
     "signOutFailed": "Gagal keluar: {{msg}}",
     "notSignedIn": "Belum masuk",
@@ -426,7 +427,10 @@
     "updateRestart": "Mulai ulang untuk memperbarui",
     "updateDownload": "Unduh & pasang",
     "fdroidCheck": "Periksa pembaruan di F-Droid",
-    "fdroidCheckNote": "Sekali sehari, StudyDesk menanyakan versi terbaru ke f-droid.org. Tidak ada data tentang Anda yang dikirim. Jika dimatikan, permintaan ini tidak dikirim sama sekali."
+    "fdroidCheckNote": "Sekali sehari, StudyDesk menanyakan versi terbaru ke f-droid.org. Tidak ada data tentang Anda yang dikirim. Jika dimatikan, permintaan ini tidak dikirim sama sekali.",
+    "otherAccountCleared": "Kamu masuk ke akun lain, jadi data akun sebelumnya dihapus dari perangkat ini.",
+    "otherAccountClearedUnsent_other": "Kamu masuk ke akun lain, jadi data akun sebelumnya dihapus dari perangkat ini, termasuk {{count}} perubahan yang belum tersinkron.",
+    "otherTabReloaded": "Kamu masuk atau keluar di tab lain, jadi tab ini dimuat ulang."
   },
   "sdob": {
     "brand": "Berhenti menimbang. Mulai belajar.",
@@ -754,8 +758,7 @@
       "assignmentAdded": "Tugas ditambahkan",
       "examAdded": "Ujian ditambahkan",
       "logged": "{{n}} mnt tercatat",
-      "syncedLegacy": "{{n}} item lama tersinkron",
-      "syncedFailed": "{{pushed}} tersinkron, {{failed}} gagal — akan dicoba lagi"
+      "queuedLegacy_other": "{{count}} to-do lama menunggu disinkronkan"
     }
   },
   "widget": {
@@ -1111,7 +1114,7 @@
       "http": "Server mengembalikan galat.",
       "network": "Tidak dapat menghubungi alamat itu."
     },
-    "repeatingNote": "{{count}} acara berulang diimpor sebagai satu tanggal",
+    "repeatingNote_one": "{{count}} acara berulang diimpor sebagai satu tanggal",
     "repeatingNote_other": "{{count}} acara berulang diimpor sebagai satu tanggal masing-masing"
   },
   "att": {
