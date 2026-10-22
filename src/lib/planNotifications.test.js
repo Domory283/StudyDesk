@@ -91,7 +91,9 @@ describe('scheduleNotifications', () => {
     );
     expect(holder.scheduled).toHaveLength(1);
     const [lead] = holder.scheduled;
-    expect(lead.title).toBe('Study block at 15:00');
+    // fmtTime follows the runner's locale ("15.00" in Finnish), so build the
+    // expected title from it rather than hard-coding "15:00".
+    expect(lead.title).toBe(`Study block at ${fmtTime(start.getTime())}`);
     expect(lead.title).toContain(fmtTime(start.getTime()));
     expect(lead.body).toBe('Calculus');
     expect(lead.schedule.at.getTime()).toBe(start.getTime() - 30 * 60 * 1000);
@@ -104,7 +106,7 @@ describe('lead reminder wording', () => {
     const labels = { fallback: 'x', now: 'now', soon: (at) => planLeadTitle(t, at) };
     const [r] = dueReminders([{ id: 'p1', startsAt: new Date(start).toISOString() }],
       { lead: 30 }, {}, start - 30 * 60_000, labels);
-    expect(r.title).toBe('Study block at 15:00');
+    expect(r.title).toBe(`Study block at ${fmtTime(start)}`);
   });
 
   it('every locale has the key, with the same placeholder', () => {
