@@ -1,0 +1,3 @@
+Pengingat tepat waktu.
+
+Pengingat belajar membangunkan ponsel tepat waktu, menyebut jam mulai, dan sudah diterjemahkan. Perubahan di perangkat lain memperbaruinya tanpa duplikat, dan setelah dimulai ulang pengingat yang sudah lewat dibuang, bukan muncul terlambat. Lock In di tengah blok dan blok yang selesai saat Anda pergi dihitung dengan benar, minggu A/B cocok di mana-mana, dan skala nilai Anda tersinkron sehingga NCC menampilkan IPK dengan skala itu.

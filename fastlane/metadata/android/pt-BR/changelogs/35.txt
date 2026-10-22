@@ -1,0 +1,3 @@
+Lembretes na hora.
+
+Os lembretes de estudo acordam o celular na hora, mostram o horário de início e são traduzidos. Mudanças em outro aparelho os atualizam sem duplicar, e após reiniciar lembretes vencidos são descartados em vez de chegar atrasados. Lock In no meio do bloco e um bloco que termina enquanto você está fora são contados certo, semanas A/B batem em todo lugar, e sua escala de notas sincroniza, para o NCC mostrar sua média nela.
