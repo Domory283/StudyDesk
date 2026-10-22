@@ -34,7 +34,7 @@ The data controller is **Limecore Studio** (sole trader, Helsinki, Finland).
 
 Contact for anything in this policy, including data requests:
 **l1m3core@gmail.com** — or open an issue at
-<https://github.com/Limekana/StudyDesk/issues> if it is not something you mind
+<https://github.com/Limecore-Studio/StudyDesk/issues> if it is not something you mind
 being public.
 
 ---
@@ -173,5 +173,5 @@ you directly where the law requires it.
 
 If this policy changes materially, the app will tell you rather than quietly
 updating this file. The change history is public in the
-[repository](https://github.com/Limekana/StudyDesk/commits/main/PRIVACY.md) —
+[repository](https://github.com/Limecore-Studio/StudyDesk/commits/main/PRIVACY.md) —
 you can read exactly what changed and when.

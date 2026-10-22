@@ -1,0 +1,3 @@
+Recordatorios a tiempo.
+
+Los recordatorios de estudio despiertan el móvil a tiempo, indican la hora de inicio y están traducidos. Los cambios en otro dispositivo los actualizan sin duplicados y, tras reiniciar, los recordatorios caducados se descartan. Lock In a mitad de bloque y un bloque que termina mientras no estás se cuentan bien, las semanas A/B coinciden en todas partes y tu escala de notas se sincroniza, para que NCC muestre tu promedio en ella.

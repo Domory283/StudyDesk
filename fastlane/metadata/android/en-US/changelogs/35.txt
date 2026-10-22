@@ -1,0 +1,3 @@
+Reminders on time.
+
+Study reminders wake the phone on time, name the start time and are translated. Edits on another device update them without duplicates, and after a reboot stale reminders are dropped instead of firing late. Lock In mid-block and a block that ends while you're away are counted correctly, A/B weeks agree everywhere, and your grade scale now syncs, so NCC shows your GPA on it.

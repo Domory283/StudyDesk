@@ -1,0 +1,3 @@
+Erinnerungen pünktlich.
+
+Lernerinnerungen wecken das Handy pünktlich, nennen die Startzeit und sind übersetzt. Änderungen auf einem anderen Gerät aktualisieren sie ohne Doppelte, und nach einem Neustart werden veraltete Erinnerungen verworfen statt verspätet gezeigt. Lock In mitten im Block und ein Block, der endet, während du weg bist, werden richtig gezählt, A/B-Wochen stimmen überall, und deine Notenskala wird synchronisiert, damit NCC den Schnitt darauf zeigt.

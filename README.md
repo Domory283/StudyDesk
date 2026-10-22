@@ -32,7 +32,7 @@ Positioning: competitors answer *"what do I have to do?"*. StudyDesk answers *"w
 | Notifications | Capacitor LocalNotifications (on-device, no push server) |
 | Styling | Inline `<style>` blocks, self-hosted Playfair Display + DM Mono + DM Sans (offline-capable), paper-grain SVG texture overlay |
 | Desktop edition | Electron (Windows `.exe` installer + portable `.zip`) |
-| Distribution | [F-Droid](https://f-droid.org/packages/com.StudyDesk.app/) (Android) · [GitHub Releases](https://github.com/Limekana/StudyDesk/releases) (signed APK + desktop build) |
+| Distribution | [F-Droid](https://f-droid.org/packages/com.StudyDesk.app/) (Android) · [GitHub Releases](https://github.com/Limecore-Studio/StudyDesk/releases) (signed APK + desktop build) |
 
 **Bundle ID:** `com.StudyDesk.app`
 **OAuth deep-link scheme:** `com.studydesk.app://login-callback` (lowercase — Supabase normalizes URI schemes per RFC 3986, Android scheme matching is case-sensitive)
@@ -86,6 +86,8 @@ npx cap sync android
 npx cap open android
 ```
 
+**Patched native dependency.** `patches/` holds [patch-package](https://github.com/ds300/patch-package) patches, applied by the `postinstall` script on every `npm install` / `npm ci` (so never install with `--ignore-scripts`). Today there is one: `@capacitor/local-notifications@8.0.2`, so that after a reboot a one-shot reminder past its own cutoff (`extra.sa`, set in `src/lib/planNotifications.js`: the end of the day for day reminders, the block's start for a plan lead) is dropped instead of firing late (StudyDesk#165). The patch is pinned to that version: upgrading the plugin makes `postinstall` fail until the patch is re-checked against the new receiver.
+
 The Supabase publishable key in `src/lib/supabase.js` is the **anon/publishable key** (safe to ship client-side). RLS gates all data; the service-role key is never exposed.
 
 
@@ -119,7 +121,7 @@ Local state stores camelCase shapes; `src/lib/merge.js` handles the snake_case �
 Released and in active development. Android builds are on **F-Droid**, which
 auto-updates from tagged GitHub Releases; the desktop edition ships as an
 additional asset on those same releases. See
-[Releases](https://github.com/Limekana/StudyDesk/releases) for the current
+[Releases](https://github.com/Limecore-Studio/StudyDesk/releases) for the current
 version and changelog.
 
 **Not on Google Play**, and no plans to be — F-Droid is the distribution

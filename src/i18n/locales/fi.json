@@ -1004,9 +1004,18 @@
     "focusChipPaused": "Tauolla"
   },
   "notif": {
-    "planSoonTitle": "Opiskelujakso {{n}} min kuluttua",
+    "planLeadTitle": "Opiskelujakso alkaa klo {{time}}",
     "planNowTitle": "Opiskelujakso alkaa nyt",
-    "planFallback": "Opiskelujakso"
+    "planFallback": "Opiskelujakso",
+    "digestTitle": "📚 StudyDesk — Seuraavaksi",
+    "examStartTitle": "📚 Aika aloittaa opiskelu",
+    "examStartBody_one": "{{label}} — {{count}} päivä jäljellä",
+    "examStartBody_other": "{{label}} — {{count}} päivää jäljellä",
+    "examSoonTitle": "⚠️ Koe 2 päivän päästä",
+    "examTodayTitle": "📝 Koe tänään — onnea",
+    "dueTomorrowTitle": "📋 Erääntyy huomenna",
+    "dueTodayTitle": "📋 Erääntyy tänään",
+    "markDone": "Merkitse tehdyksi"
   },
   "referral": {
     "eyebrow": "YKSI KYSYMYS",

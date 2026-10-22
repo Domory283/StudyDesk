@@ -1,0 +1,3 @@
+Muistutukset ajallaan.
+
+Opiskelumuistutukset herättävät puhelimen ajallaan, kertovat alkamisajan ja on käännetty. Toisella laitteella tehdyt muutokset päivittävät ne ilman kaksoiskappaleita, ja uudelleenkäynnistyksen jälkeen vanhentuneet muistutukset hylätään. Lock In kesken jakson ja poissa ollessa päättyvä jakso lasketaan oikein, A/B-viikot täsmäävät kaikkialla, ja arvosana-asteikkosi synkronoituu, joten NCC näyttää keskiarvon sillä.

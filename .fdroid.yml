@@ -9,9 +9,9 @@ Categories:
 License: MIT
 AuthorName: Limecore Studio
 AuthorEmail: l1m3core@gmail.com
-WebSite: https://github.com/Limekana/StudyDesk
-SourceCode: https://github.com/Limekana/StudyDesk
-IssueTracker: https://github.com/Limekana/StudyDesk/issues
+WebSite: https://github.com/Limecore-Studio/StudyDesk
+SourceCode: https://github.com/Limecore-Studio/StudyDesk
+IssueTracker: https://github.com/Limecore-Studio/StudyDesk/issues
 
 AutoName: StudyDesk
 Description: |-
@@ -39,7 +39,7 @@ AntiFeatures:
   - NonFreeNet  # default build talks to a developer-hosted Supabase project
 
 RepoType: git
-Repo: https://github.com/Limekana/StudyDesk.git
+Repo: https://github.com/Limecore-Studio/StudyDesk.git
 
 Builds:
   - versionName: '1.0'
