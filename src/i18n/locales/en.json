@@ -1180,5 +1180,22 @@
     "versions": "Update from {{current}} to {{latest}}",
     "open": "Get it on F-Droid",
     "later": "Later"
+  },
+  "done": {
+    "title": "Done",
+    "open": "Done ({{count}})",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "earlier": "Earlier",
+    "empty": "Nothing ticked off yet.",
+    "restored": "Back in your list",
+    "untick": "Untick: {{title}}",
+    "kind": {
+      "action": "Task",
+      "assignment": "Assignment",
+      "exam": "Exam"
+    },
+    "markedDone": "Done: {{title}}",
+    "undo": "Undo"
   }
 }

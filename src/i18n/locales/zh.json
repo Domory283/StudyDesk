@@ -1176,5 +1176,22 @@
     "versions": "从 {{current}} 更新到 {{latest}}",
     "open": "前往 F-Droid 获取",
     "later": "稍后"
+  },
+  "done": {
+    "title": "已完成",
+    "open": "已完成（{{count}}）",
+    "today": "今天",
+    "yesterday": "昨天",
+    "earlier": "更早",
+    "empty": "还没有勾选任何项目。",
+    "restored": "已放回你的列表",
+    "untick": "取消勾选：{{title}}",
+    "kind": {
+      "action": "任务",
+      "assignment": "作业",
+      "exam": "考试"
+    },
+    "markedDone": "已完成：{{title}}",
+    "undo": "撤销"
   }
 }

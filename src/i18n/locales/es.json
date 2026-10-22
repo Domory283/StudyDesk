@@ -1189,5 +1189,22 @@
     "versions": "Actualizar de {{current}} a {{latest}}",
     "open": "Descargar en F-Droid",
     "later": "Más tarde"
+  },
+  "done": {
+    "title": "Hecho",
+    "open": "Hecho ({{count}})",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "earlier": "Antes",
+    "empty": "Aún no has marcado nada.",
+    "restored": "De vuelta en tu lista",
+    "untick": "Desmarcar: {{title}}",
+    "kind": {
+      "action": "Tarea",
+      "assignment": "Entrega",
+      "exam": "Examen"
+    },
+    "markedDone": "Hecho: {{title}}",
+    "undo": "Deshacer"
   }
 }

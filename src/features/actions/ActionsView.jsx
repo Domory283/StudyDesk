@@ -5,6 +5,8 @@ import { useScrollSelectedIntoView } from "../../lib/useScrollSelectedIntoView.j
 import { daysUntil } from "../../lib/deadlines.js";
 import { enterSubmit } from "../../lib/imeSubmit.js";
 import FirstSteps from "../onboarding/FirstSteps.jsx";
+import DoneList from "./DoneList.jsx";
+import { doneItems, isExpiredDoneAction, offerUndo } from "../../lib/doneList.js";
 
 const BUCKETS = ["today", "this_week", "later"];
 const BUCKET_COLORS = {
@@ -18,6 +20,11 @@ export default function ActionsView({ state, dispatch, showFlash, onAddCourse, o
   const { t, i18n } = useTranslation();
   const currentLang = (i18n.language || "en").split("-")[0];
   const langRef = useScrollSelectedIntoView();
+  // v1.19 (#87) — the Done list sheet.
+  const [showDone, setShowDone] = useState(false);
+  const doneCount = doneItems(state).length;
+  const doneLink = doneCount>0&&<button type="button" className="done-open" onClick={()=>setShowDone(true)}>{t('done.open',{count:doneCount})}</button>;
+  const doneSheet = showDone&&<DoneList state={state} dispatch={dispatch} showFlash={showFlash} onClose={()=>setShowDone(false)}/>;
   const [newText, setNewText] = useState(""); const [newBucket, setNewBucket] = useState("today"); const [newCourse, setNewCourse] = useState("");
   const courses = Object.values(state.courses).filter(c => !c.deletedAt);
   // v1.5 (5D) — active = non-archived. When every course is archived (a new
@@ -57,16 +64,12 @@ export default function ActionsView({ state, dispatch, showFlash, onAddCourse, o
     })();
     return now < purgeAt;
   });
-  // Purge stale done actions from state on mount
+  // Purge old done actions from state on mount. v1.19 (#87): they used to go
+  // the morning after being ticked, which is what made a misclicked task
+  // unrecoverable. They now stay in the Done list for DONE_ACTION_KEEP_DAYS;
+  // Next Up still stops SHOWING them after 3am, as above.
   useEffect(() => {
-    const stale = state.actions.filter(a => {
-      if (!a.done || !a.doneAt) return a.done;
-      const purgeAt = (() => {
-        const d = new Date(a.doneAt); d.setHours(3, 0, 0, 0); d.setDate(d.getDate() + 1);
-        return d.getTime();
-      })();
-      return now >= purgeAt;
-    });
+    const stale = state.actions.filter(a => isExpiredDoneAction(a, now));
     stale.forEach(a => dispatch({type:"DELETE_ACTION", id:a.id}));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -112,8 +115,12 @@ export default function ActionsView({ state, dispatch, showFlash, onAddCourse, o
         <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:12}}>
           <button className="btn btn-sm" onClick={()=>dispatch({type:"SET_VIEW",view:"plan"})}>{t('nextup.goToPlan')}</button>
         </div>
+        {/* Ticking off the last deadline lands here, so the way back to what
+            was just ticked has to be here too (#87). */}
+        {doneLink}
       </div>
     </div>
+    {doneSheet}
   </div>;
   // Three buckets side by side on a wide screen rather than stacked: Today /
   // This week / Later are a natural three-column read, and stacking them is
@@ -134,12 +141,13 @@ export default function ActionsView({ state, dispatch, showFlash, onAddCourse, o
         <div className="bucket-header"><div className="bucket-dot" style={{background:col.bg}}/>{t(`av.bucket.${bucket}`)}</div>
         {items.map(a=><div key={a.id} className={"action-item"+(a.done?" done":"")+(a.suggested?" suggested":"")}>
           <div className={"asgn-check"+(a.done?" checked":"")} onClick={()=>{
-            if(a.suggested){
-              if(a.sourceType==="assignment") dispatch({type:"TOGGLE_ASSIGNMENT",id:a.sourceId});
-              else if(a.sourceType==="exam") dispatch({type:"TOGGLE_EXAM",id:a.sourceId});
-            } else {
-              dispatch({type:"TOGGLE_ACTION",id:a.id});
-            }
+            const toggle = a.suggested
+              ? (a.sourceType==="assignment" ? {type:"TOGGLE_ASSIGNMENT",id:a.sourceId} : a.sourceType==="exam" ? {type:"TOGGLE_EXAM",id:a.sourceId} : null)
+              : {type:"TOGGLE_ACTION",id:a.id};
+            if(!toggle) return;
+            dispatch(toggle);
+            // v1.19 (#87) — a tick can be taken back for a few seconds.
+            if(!a.done) offerUndo(a.text, toggle);
           }}/>
           <div className={"action-text"+(a.done?" done":"")}>{a.text}</div>
           {!a.suggested&&<button className="btn-danger-text" onClick={()=>dispatch({type:"DELETE_ACTION",id:a.id})}>×</button>}
@@ -147,6 +155,8 @@ export default function ActionsView({ state, dispatch, showFlash, onAddCourse, o
         </div>)}
       </div>;
     })}
+    {doneLink}
+    {doneSheet}
     <div className="divider"/>
     <div className="section-label">{t('av.act.addManually')}</div>
     <div className="quick-add-box">

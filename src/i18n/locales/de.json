@@ -1180,5 +1180,22 @@
     "versions": "Update von {{current}} auf {{latest}}",
     "open": "Auf F-Droid holen",
     "later": "Später"
+  },
+  "done": {
+    "title": "Erledigt",
+    "open": "Erledigt ({{count}})",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "earlier": "Früher",
+    "empty": "Noch nichts abgehakt.",
+    "restored": "Wieder in deiner Liste",
+    "untick": "Haken entfernen: {{title}}",
+    "kind": {
+      "action": "Aufgabe",
+      "assignment": "Hausaufgabe",
+      "exam": "Prüfung"
+    },
+    "markedDone": "Erledigt: {{title}}",
+    "undo": "Rückgängig"
   }
 }

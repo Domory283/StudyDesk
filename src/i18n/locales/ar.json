@@ -1232,5 +1232,22 @@
     "versions": "التحديث من {{current}} إلى {{latest}}",
     "open": "احصل عليه من F-Droid",
     "later": "لاحقًا"
+  },
+  "done": {
+    "title": "المنجز",
+    "open": "المنجز ({{count}})",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "earlier": "سابقًا",
+    "empty": "لم تُنجز أي مهمة بعد.",
+    "restored": "عاد إلى قائمتك",
+    "untick": "إلغاء التحديد: {{title}}",
+    "kind": {
+      "action": "مهمة",
+      "assignment": "واجب",
+      "exam": "اختبار"
+    },
+    "markedDone": "تم: {{title}}",
+    "undo": "تراجع"
   }
 }

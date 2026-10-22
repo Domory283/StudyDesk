@@ -1180,5 +1180,22 @@
     "versions": "{{current}} से {{latest}} पर अपडेट करें",
     "open": "F-Droid से पाएँ",
     "later": "बाद में"
+  },
+  "done": {
+    "title": "पूरे हुए",
+    "open": "पूरे हुए ({{count}})",
+    "today": "आज",
+    "yesterday": "कल",
+    "earlier": "पहले",
+    "empty": "अभी तक कुछ भी पूरा नहीं किया गया।",
+    "restored": "आपकी सूची में वापस",
+    "untick": "निशान हटाएँ: {{title}}",
+    "kind": {
+      "action": "काम",
+      "assignment": "असाइनमेंट",
+      "exam": "परीक्षा"
+    },
+    "markedDone": "पूरा: {{title}}",
+    "undo": "पूर्ववत करें"
   }
 }

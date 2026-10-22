@@ -1189,5 +1189,22 @@
     "versions": "Atualizar de {{current}} para {{latest}}",
     "open": "Obter no F-Droid",
     "later": "Mais tarde"
+  },
+  "done": {
+    "title": "Concluído",
+    "open": "Concluído ({{count}})",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "earlier": "Antes",
+    "empty": "Nada marcado ainda.",
+    "restored": "De volta à sua lista",
+    "untick": "Desmarcar: {{title}}",
+    "kind": {
+      "action": "Tarefa",
+      "assignment": "Trabalho",
+      "exam": "Prova"
+    },
+    "markedDone": "Concluído: {{title}}",
+    "undo": "Desfazer"
   }
 }

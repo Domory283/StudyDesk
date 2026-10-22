@@ -1180,5 +1180,22 @@
     "versions": "Päivitä versiosta {{current}} versioon {{latest}}",
     "open": "Hae F-Droidista",
     "later": "Myöhemmin"
+  },
+  "done": {
+    "title": "Tehdyt",
+    "open": "Tehdyt ({{count}})",
+    "today": "Tänään",
+    "yesterday": "Eilen",
+    "earlier": "Aiemmin",
+    "empty": "Mitään ei ole vielä merkitty tehdyksi.",
+    "restored": "Palautettu listaasi",
+    "untick": "Poista merkintä: {{title}}",
+    "kind": {
+      "action": "Tehtävä",
+      "assignment": "Palautus",
+      "exam": "Koe"
+    },
+    "markedDone": "Tehty: {{title}}",
+    "undo": "Kumoa"
   }
 }

@@ -5,6 +5,7 @@ import { fmtDate, fmtDateFull } from "../../lib/dates.js";
 import { DIFFICULTY_COLORS } from "../../lib/examDifficulty.js";
 import { daysUntil, studyStartDate, urgencyColor, urgencyLabel } from "../../lib/deadlines.js";
 import { enterSubmit } from "../../lib/imeSubmit.js";
+import { offerUndo } from "../../lib/doneList.js";
 
 // ── ExamCard ──────────────────────────────────────────────────────────────────
 export default function ExamCard({ exam, courses, dispatch }) {
@@ -66,7 +67,7 @@ export default function ExamCard({ exam, courses, dispatch }) {
   </div>;
   return <div className={"exam-card"+(exam.done?" done":"")} style={{borderInlineStartColor:course?.color||"var(--border2)"}}>
     <div className="exam-card-header" onClick={()=>setOpen(o=>!o)}>
-      <div className={"asgn-check"+(exam.done?" checked":"")} style={{marginTop:5,flexShrink:0}} onClick={e=>{e.stopPropagation();dispatch({type:"TOGGLE_EXAM",id:exam.id});}}/>
+      <div className={"asgn-check"+(exam.done?" checked":"")} style={{marginTop:5,flexShrink:0}} onClick={e=>{e.stopPropagation();const toggle={type:"TOGGLE_EXAM",id:exam.id};dispatch(toggle);if(!exam.done) offerUndo(exam.title,toggle);}}/>
       <div className="exam-card-header-info">
         <div className={"exam-card-title"+(exam.done?" done":"")}>{exam.title}</div>
         <div className="exam-card-meta">
