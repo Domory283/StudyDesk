@@ -711,7 +711,12 @@
       "prepareFor": "准备：{{label}}",
       "topicMore": "（还有 {{n}} 个）",
       "editExam": "编辑考试",
-      "examDate": "考试日期"
+      "examDate": "考试日期",
+      "examToday": "今天考试",
+      "examTomorrow": "明天考试",
+      "examInDays": "{{n}} 天后考试",
+      "startStudyingNow": "开始复习 {{label}}（{{difficulty}}），{{when}}",
+      "startStudyingOn": "{{date}} 开始复习 {{label}}（{{difficulty}}）"
     },
     "md": {
       "addAssignment": "添加作业",

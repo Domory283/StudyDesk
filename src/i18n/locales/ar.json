@@ -745,7 +745,12 @@
       "prepareFor": "استعدّ لـ {{label}}",
       "topicMore": " (+{{n}} أخرى)",
       "editExam": "تعديل الاختبار",
-      "examDate": "تاريخ الاختبار"
+      "examDate": "تاريخ الاختبار",
+      "examToday": "الاختبار اليوم",
+      "examTomorrow": "الاختبار غدًا",
+      "examInDays": "الاختبار بعد {{n}} يوم",
+      "startStudyingNow": "ابدأ المذاكرة لـ {{label}} ({{difficulty}})، {{when}}",
+      "startStudyingOn": "ابدأ المذاكرة لـ {{label}} في {{date}} ({{difficulty}})"
     },
     "md": {
       "addAssignment": "إضافة واجب",

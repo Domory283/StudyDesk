@@ -713,7 +713,12 @@
       "prepareFor": "Prepare for {{label}}",
       "topicMore": " (+{{n}} more)",
       "editExam": "Edit exam",
-      "examDate": "Exam date"
+      "examDate": "Exam date",
+      "examToday": "exam today",
+      "examTomorrow": "exam tomorrow",
+      "examInDays": "exam in {{n}} days",
+      "startStudyingNow": "Start studying for {{label}} ({{difficulty}}), {{when}}",
+      "startStudyingOn": "Start studying for {{label}} on {{date}} ({{difficulty}})"
     },
     "md": {
       "addAssignment": "Add Assignment",

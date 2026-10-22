@@ -720,7 +720,12 @@
       "prepareFor": "Preparar: {{label}}",
       "topicMore": " (+{{n}} más)",
       "editExam": "Editar examen",
-      "examDate": "Fecha del examen"
+      "examDate": "Fecha del examen",
+      "examToday": "examen hoy",
+      "examTomorrow": "examen mañana",
+      "examInDays": "examen en {{n}} días",
+      "startStudyingNow": "Empieza a estudiar para {{label}} ({{difficulty}}), {{when}}",
+      "startStudyingOn": "Empieza a estudiar para {{label}} el {{date}} ({{difficulty}})"
     },
     "md": {
       "addAssignment": "Añadir tarea",

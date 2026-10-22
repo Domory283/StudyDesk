@@ -713,7 +713,12 @@
       "prepareFor": "{{label}} की तैयारी करें",
       "topicMore": " (+{{n}} और)",
       "editExam": "परीक्षा संपादित करें",
-      "examDate": "परीक्षा की तारीख"
+      "examDate": "परीक्षा की तारीख",
+      "examToday": "परीक्षा आज",
+      "examTomorrow": "परीक्षा कल",
+      "examInDays": "परीक्षा {{n}} दिन में",
+      "startStudyingNow": "{{label}} की पढ़ाई शुरू करें ({{difficulty}}), {{when}}",
+      "startStudyingOn": "{{date}} को {{label}} की पढ़ाई शुरू करें ({{difficulty}})"
     },
     "md": {
       "addAssignment": "असाइनमेंट जोड़ें",
