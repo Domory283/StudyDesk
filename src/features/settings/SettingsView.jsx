@@ -1495,7 +1495,7 @@ export default function SettingsView({ state, dispatch, showFlash, session }) {
               <div className="sv2-tech-item"><span>{t('settings.bundle')}</span><span>com.StudyDesk.app</span></div>
               <div className="sv2-tech-item"><span>{t('settings.backend')}</span><span>Supabase (hkktorzh…)</span></div>
               {userId && <div className="sv2-tech-item"><span>{t('settings.userId')}</span><span title={userId}>{userIdShort}</span></div>}
-              <div className="sv2-tech-item"><span>{t('settings.source')}</span><span><a className="sv2-link" href="https://github.com/Limekana/StudyDesk" target="_blank" rel="noopener noreferrer">github.com/Limekana/StudyDesk</a></span></div>
+              <div className="sv2-tech-item"><span>{t('settings.source')}</span><span><a className="sv2-link" href="https://github.com/Limecore-Studio/StudyDesk" target="_blank" rel="noopener noreferrer">github.com/Limecore-Studio/StudyDesk</a></span></div>
               <div className="sv2-tech-item"><span>{t('settings.license')}</span><span>MIT</span></div>
             </div>
           </details>

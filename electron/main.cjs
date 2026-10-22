@@ -533,7 +533,7 @@ ipcMain.handle('auth:begin', (_event, url) => {
 // v1.15 (Item 12) — find, download and install updates (electron-updater),
 // with a notice-only fallback. See updater.cjs.
 setupUpdates({
-  repo: 'Limekana/StudyDesk',
+  repo: 'Limecore-Studio/StudyDesk',
   installerPrefix: 'StudyDesk-Desktop-Setup-',
   log,
   getWindow: () => mainWindow,

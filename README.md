@@ -32,7 +32,7 @@ Positioning: competitors answer *"what do I have to do?"*. StudyDesk answers *"w
 | Notifications | Capacitor LocalNotifications (on-device, no push server) |
 | Styling | Inline `<style>` blocks, self-hosted Playfair Display + DM Mono + DM Sans (offline-capable), paper-grain SVG texture overlay |
 | Desktop edition | Electron (Windows `.exe` installer + portable `.zip`) |
-| Distribution | [F-Droid](https://f-droid.org/packages/com.StudyDesk.app/) (Android) · [GitHub Releases](https://github.com/Limekana/StudyDesk/releases) (signed APK + desktop build) |
+| Distribution | [F-Droid](https://f-droid.org/packages/com.StudyDesk.app/) (Android) · [GitHub Releases](https://github.com/Limecore-Studio/StudyDesk/releases) (signed APK + desktop build) |
 
 **Bundle ID:** `com.StudyDesk.app`
 **OAuth deep-link scheme:** `com.studydesk.app://login-callback` (lowercase — Supabase normalizes URI schemes per RFC 3986, Android scheme matching is case-sensitive)
@@ -121,7 +121,7 @@ Local state stores camelCase shapes; `src/lib/merge.js` handles the snake_case �
 Released and in active development. Android builds are on **F-Droid**, which
 auto-updates from tagged GitHub Releases; the desktop edition ships as an
 additional asset on those same releases. See
-[Releases](https://github.com/Limekana/StudyDesk/releases) for the current
+[Releases](https://github.com/Limecore-Studio/StudyDesk/releases) for the current
 version and changelog.
 
 **Not on Google Play**, and no plans to be — F-Droid is the distribution

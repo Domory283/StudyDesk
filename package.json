@@ -7,7 +7,7 @@
   "author": "Limecore Studio",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Limekana/StudyDesk.git"
+    "url": "https://github.com/Limecore-Studio/StudyDesk.git"
   },
   "main": "electron/main.cjs",
   "scripts": {
@@ -95,7 +95,7 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "Limekana",
+        "owner": "Limecore-Studio",
         "repo": "StudyDesk"
       }
     ]
