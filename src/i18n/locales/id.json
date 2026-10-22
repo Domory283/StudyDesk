@@ -430,7 +430,15 @@
     "fdroidCheckNote": "Sekali sehari, StudyDesk menanyakan versi terbaru ke f-droid.org. Tidak ada data tentang Anda yang dikirim. Jika dimatikan, permintaan ini tidak dikirim sama sekali.",
     "otherAccountCleared": "Kamu masuk ke akun lain, jadi data akun sebelumnya dihapus dari perangkat ini.",
     "otherAccountClearedUnsent_other": "Kamu masuk ke akun lain, jadi data akun sebelumnya dihapus dari perangkat ini, termasuk {{count}} perubahan yang belum tersinkron.",
-    "otherTabReloaded": "Kamu masuk atau keluar di tab lain, jadi tab ini dimuat ulang."
+    "otherTabReloaded": "Kamu masuk atau keluar di tab lain, jadi tab ini dimuat ulang.",
+    "scalePresetDe": "Jerman · DIA 0–15 (1–6)",
+    "reportGrades": "Rapor",
+    "reportWhole": "Nilai bulat",
+    "reportFine": "Rata-rata poin",
+    "reportMethod": "Urutan",
+    "reportConvertFirst": "Ubah tiap nilai, lalu rata-ratakan",
+    "reportAverageFirst": "Rata-ratakan poin, lalu ubah",
+    "reportNote": "Dengan nilai bulat, tiap mata pelajaran menampilkan nilai rapornya (mis. 2) dengan rata-rata poin di bawahnya, dan rata-rata keseluruhan dihitung dari nilai rapor. Mata pelajaran tepat di antara dua nilai menampilkan keduanya (1–2): guru yang memutuskan."
   },
   "sdob": {
     "brand": "Berhenti menimbang. Mulai belajar.",
@@ -520,7 +528,11 @@
     "pcErrName": "Beri nama mata kuliahnya.",
     "pcErrCredits": "SKS harus nol atau lebih.",
     "weightBlocksAria": "Nilai ini {{pct}}% dari kursus, satu dari {{n}} nilai berbobot",
-    "weightBlocksNoneAria": "{{n}} nilai berbobot di kursus ini"
+    "weightBlocksNoneAria": "{{n}} nilai berbobot di kursus ini",
+    "reportScale": "Nilai rapor {{best}}–{{worst}} · {{best}} terbaik",
+    "reportProjection": "Ada mata pelajaran di antara dua nilai rapor, jadi ini proyeksi",
+    "reportBetween": "Tepat di antara dua nilai: guru yang memutuskan",
+    "fGradeCustom": "Nilai ({{min}}–{{max}})"
   },
   "sv": {
     "today": "Hari ini",

@@ -434,7 +434,15 @@
     "otherAccountCleared": "Kirjauduit toiselle tilille, joten edellisen tilin tiedot poistettiin tältä laitteelta.",
     "otherAccountClearedUnsent_one": "Kirjauduit toiselle tilille, joten edellisen tilin tiedot poistettiin tältä laitteelta, mukaan lukien {{count}} synkronoimaton muutos.",
     "otherAccountClearedUnsent_other": "Kirjauduit toiselle tilille, joten edellisen tilin tiedot poistettiin tältä laitteelta, mukaan lukien {{count}} synkronoimatonta muutosta.",
-    "otherTabReloaded": "Kirjauduit sisään tai ulos toisessa välilehdessä, joten tämä välilehti ladattiin uudelleen."
+    "otherTabReloaded": "Kirjauduit sisään tai ulos toisessa välilehdessä, joten tämä välilehti ladattiin uudelleen.",
+    "scalePresetDe": "Saksa · DIA 0–15 (1–6)",
+    "reportGrades": "Todistus",
+    "reportWhole": "Kokonaiset arvosanat",
+    "reportFine": "Pistekeskiarvo",
+    "reportMethod": "Järjestys",
+    "reportConvertFirst": "Muunna jokainen arvosana, sitten keskiarvo",
+    "reportAverageFirst": "Pisteiden keskiarvo, sitten muunna",
+    "reportNote": "Kokonaisilla arvosanoilla jokainen kurssi näyttää todistusarvosanansa (esim. 2) ja sen alla pistekeskiarvon, ja kokonaiskeskiarvo lasketaan todistusarvosanoista. Täsmälleen kahden arvosanan välissä oleva kurssi näyttää molemmat (1–2): opettaja päättää."
   },
   "sdob": {
     "brand": "Lopeta miettiminen. Aloita opiskelu.",
@@ -526,7 +534,11 @@
     "pcErrName": "Anna kurssille nimi.",
     "pcErrCredits": "Opintopisteiden on oltava vähintään nolla.",
     "weightBlocksAria": "Tämä arvosana on {{pct}} % kurssista, yksi {{n}} painotetusta arvosanasta",
-    "weightBlocksNoneAria": "{{n}} painotettua arvosanaa tällä kurssilla"
+    "weightBlocksNoneAria": "{{n}} painotettua arvosanaa tällä kurssilla",
+    "reportScale": "Todistusarvosanat {{best}}–{{worst}} · {{best}} paras",
+    "reportProjection": "Jokin kurssi on kahden todistusarvosanan välissä, joten tämä on ennuste",
+    "reportBetween": "Täsmälleen kahden arvosanan välissä: opettaja päättää",
+    "fGradeCustom": "Arvosana ({{min}}–{{max}})"
   },
   "sv": {
     "today": "Tänään",

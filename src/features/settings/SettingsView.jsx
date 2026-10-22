@@ -1292,7 +1292,9 @@ export default function SettingsView({ state, dispatch, showFlash, session }) {
                     key={p.id}
                     type="button"
                     className="sv2-preset"
-                    onClick={() => setScale(p.scale)}
+                    // v1.19 (#178) — steps and the report rule belong to the
+                    // preset that set them; picking another chip clears them.
+                    onClick={() => setScale({ steps: null, report: null, ...p.scale })}
                   >
                     {t(p.labelKey)}
                   </button>
@@ -1359,6 +1361,43 @@ export default function SettingsView({ state, dispatch, showFlash, session }) {
                 </span>
               </div>
               <div className="sv2-note">{describeScale(activeScale, t)}</div>
+              {/* v1.19 (#178) — only for a scale that knows its report-card
+                  bands (the DIA / German chip). Whether the school converts
+                  each grade first or averages first is not certain, so it is
+                  a choice here rather than a rule in the code. */}
+              {activeScale.report && (
+                <>
+                  <div className="sv2-scale-dir">
+                    <span className="sv2-row-label">{t('settings.reportGrades')}</span>
+                    <span className="sv2-mode">
+                      <button
+                        className={activeScale.report.enabled ? 'active' : ''}
+                        onClick={() => setScale({ report: { ...activeScale.report, enabled: true } })}
+                      >{t('settings.reportWhole')}</button>
+                      <button
+                        className={!activeScale.report.enabled ? 'active' : ''}
+                        onClick={() => setScale({ report: { ...activeScale.report, enabled: false } })}
+                      >{t('settings.reportFine')}</button>
+                    </span>
+                  </div>
+                  {activeScale.report.enabled && (
+                    <div className="sv2-scale-dir">
+                      <span className="sv2-row-label">{t('settings.reportMethod')}</span>
+                      <span className="sv2-mode">
+                        <button
+                          className={activeScale.report.method === 'convertThenAverage' ? 'active' : ''}
+                          onClick={() => setScale({ report: { ...activeScale.report, method: 'convertThenAverage' } })}
+                        >{t('settings.reportConvertFirst')}</button>
+                        <button
+                          className={activeScale.report.method === 'averageThenConvert' ? 'active' : ''}
+                          onClick={() => setScale({ report: { ...activeScale.report, method: 'averageThenConvert' } })}
+                        >{t('settings.reportAverageFirst')}</button>
+                      </span>
+                    </div>
+                  )}
+                  <div className="sv2-note">{t('settings.reportNote')}</div>
+                </>
+              )}
             </div>
           )}
           <div className="sv2-note">
@@ -1374,7 +1413,7 @@ export default function SettingsView({ state, dispatch, showFlash, session }) {
         {/* ── Period history (Archive) ── */}
         <div className="sv2-section">
           <div className="sv2-section-title">{t('history.title')}</div>
-          <PeriodHistory courses={state.courses} grades={grades} mode={mode} />
+          <PeriodHistory courses={state.courses} grades={grades} mode={mode} scale={activeScale} />
           <div className="sv2-note">{t('history.note')}</div>
         </div>
 

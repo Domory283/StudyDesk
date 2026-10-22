@@ -438,7 +438,15 @@
     "otherAccountClearedUnsent_one": "Connexion à un autre compte : les données du compte précédent ont été supprimées de cet appareil, dont {{count}} modification non synchronisée.",
     "otherAccountClearedUnsent_many": "Connexion à un autre compte : les données du compte précédent ont été supprimées de cet appareil, dont {{count}} modifications non synchronisées.",
     "otherAccountClearedUnsent_other": "Connexion à un autre compte : les données du compte précédent ont été supprimées de cet appareil, dont {{count}} modifications non synchronisées.",
-    "otherTabReloaded": "Connexion ou déconnexion dans un autre onglet : cet onglet a été rechargé."
+    "otherTabReloaded": "Connexion ou déconnexion dans un autre onglet : cet onglet a été rechargé.",
+    "scalePresetDe": "Allemagne · DIA 0–15 (1–6)",
+    "reportGrades": "Bulletin",
+    "reportWhole": "Notes entières",
+    "reportFine": "Moyenne des points",
+    "reportMethod": "Ordre",
+    "reportConvertFirst": "Convertir chaque note, puis faire la moyenne",
+    "reportAverageFirst": "Moyenne des points, puis convertir",
+    "reportNote": "Avec les notes entières, chaque matière affiche sa note de bulletin (p. ex. 2) avec la moyenne des points en dessous, et la moyenne générale porte sur les notes de bulletin. Une matière pile entre deux notes affiche les deux (1–2) : l'enseignant décide."
   },
   "sdob": {
     "brand": "Arrête de choisir. Commence à réviser.",
@@ -532,7 +540,11 @@
     "pcErrName": "Donnez un nom au cours.",
     "pcErrCredits": "Les crédits doivent être positifs ou nuls.",
     "weightBlocksAria": "Cette note représente {{pct}} % du cours, l'une des {{n}} notes pondérées",
-    "weightBlocksNoneAria": "{{n}} notes pondérées dans ce cours"
+    "weightBlocksNoneAria": "{{n}} notes pondérées dans ce cours",
+    "reportScale": "Notes de bulletin {{best}}–{{worst}} · {{best}} la meilleure",
+    "reportProjection": "Une matière est entre deux notes de bulletin : c'est une projection",
+    "reportBetween": "Pile entre deux notes : l'enseignant décide",
+    "fGradeCustom": "Note ({{min}}–{{max}})"
   },
   "sv": {
     "today": "Aujourd’hui",
