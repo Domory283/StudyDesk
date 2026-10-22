@@ -1141,7 +1141,13 @@
       "network": "Impossible d'atteindre cette adresse."
     },
     "repeatingNote_one": "{{count}} événement récurrent importé comme une seule date",
-    "repeatingNote_other": "{{count}} événements récurrents importés comme une seule date chacun"
+    "repeatingNote_other": "{{count}} événements récurrents importés comme une seule date chacun",
+    "mapCourses": "Cours",
+    "mapTitle": "Associer les cours",
+    "mapHelp": "Chaque cours de ce calendrier peut aller vers l'un de tes cours StudyDesk. Les éléments d'un cours non associé restent où ils sont.",
+    "mapSource": "{{label}} ({{n}})",
+    "notMapped": "Non associé",
+    "mapSaved": "Cours enregistrés · {{n}} déplacés"
   },
   "att": {
     "tab": "Présence",

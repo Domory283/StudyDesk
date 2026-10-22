@@ -1141,7 +1141,13 @@
       "network": "Não foi possível contactar esse endereço."
     },
     "repeatingNote_one": "{{count}} evento repetido importado como uma única data",
-    "repeatingNote_other": "{{count}} eventos repetidos importados como uma única data cada"
+    "repeatingNote_other": "{{count}} eventos repetidos importados como uma única data cada",
+    "mapCourses": "Disciplinas",
+    "mapTitle": "Associar disciplinas",
+    "mapHelp": "Cada disciplina deste calendário pode ir para uma das suas disciplinas no StudyDesk. Itens de uma disciplina não associada ficam onde estão.",
+    "mapSource": "{{label}} ({{n}})",
+    "notMapped": "Não associada",
+    "mapSaved": "Disciplinas salvas · {{n}} movidos"
   },
   "att": {
     "tab": "Assiduidade",

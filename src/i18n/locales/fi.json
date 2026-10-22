@@ -1132,7 +1132,13 @@
       "network": "Osoitteeseen ei saatu yhteyttä."
     },
     "repeatingNote_one": "{{count}} toistuva tapahtuma tuotiin yhtenä päivänä",
-    "repeatingNote_other": "{{count}} toistuvaa tapahtumaa tuotiin kukin yhtenä päivänä"
+    "repeatingNote_other": "{{count}} toistuvaa tapahtumaa tuotiin kukin yhtenä päivänä",
+    "mapCourses": "Kurssit",
+    "mapTitle": "Yhdistä kurssit",
+    "mapHelp": "Jokainen tämän kalenterin kurssi voidaan yhdistää johonkin StudyDesk-kurssiisi. Yhdistämättömän kurssin kohteet pysyvät paikallaan.",
+    "mapSource": "{{label}} ({{n}})",
+    "notMapped": "Ei yhdistetty",
+    "mapSaved": "Kurssit tallennettu · {{n}} siirretty"
   },
   "att": {
     "tab": "Läsnäolo",

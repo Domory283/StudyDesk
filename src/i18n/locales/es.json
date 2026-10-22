@@ -1141,7 +1141,13 @@
       "network": "No se pudo acceder a esa dirección."
     },
     "repeatingNote_one": "{{count}} evento repetido importado como una sola fecha",
-    "repeatingNote_other": "{{count}} eventos repetidos importados como una sola fecha cada uno"
+    "repeatingNote_other": "{{count}} eventos repetidos importados como una sola fecha cada uno",
+    "mapCourses": "Cursos",
+    "mapTitle": "Emparejar cursos",
+    "mapHelp": "Cada curso de este calendario puede ir a uno de tus cursos de StudyDesk. Los elementos de un curso sin asignar se quedan donde están.",
+    "mapSource": "{{label}} ({{n}})",
+    "notMapped": "Sin asignar",
+    "mapSaved": "Cursos guardados · {{n}} movidos"
   },
   "att": {
     "tab": "Asistencia",

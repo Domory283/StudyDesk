@@ -1132,7 +1132,13 @@
       "network": "Could not reach that address."
     },
     "repeatingNote_one": "{{count}} repeating event imported as a single date",
-    "repeatingNote_other": "{{count}} repeating events imported as a single date each"
+    "repeatingNote_other": "{{count}} repeating events imported as a single date each",
+    "mapCourses": "Courses",
+    "mapTitle": "Match courses",
+    "mapHelp": "Each course in this calendar can go to one of your StudyDesk courses. Items from a course left on Not mapped stay where they are.",
+    "mapSource": "{{label}} ({{n}})",
+    "notMapped": "Not mapped",
+    "mapSaved": "Courses saved · {{n}} moved"
   },
   "att": {
     "tab": "Attendance",
