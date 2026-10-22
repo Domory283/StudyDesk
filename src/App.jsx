@@ -64,6 +64,7 @@ import { useShellTier, useSidebarRail } from "./lib/useShell.js";
 import { enterSubmit } from "./lib/imeSubmit.js";
 import { rehydrateState } from "./app/rehydrate.js";
 import { usePersistState } from "./app/usePersistState.js";
+import { useGradeScaleSync } from "./app/useGradeScaleSync.js";
 import { useReminders } from "./app/useReminders.js";
 import { useWidgets } from "./app/useWidgets.js";
 import { useOutboxTriggers, useReminderActions } from "./app/useAppEvents.js";
@@ -150,6 +151,8 @@ export default function App() {
   // its useState had run.
   const [onboardChecked, setOnboardChecked] = useState(false);
   usePersistState(state);
+  // v1.18.2: the grade scale follows the account, so NCC can read it.
+  useGradeScaleSync(state, dispatch, session?.user?.id);
 
   useReminders({ onboarded, state, t });
 
