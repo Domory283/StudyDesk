@@ -48,6 +48,7 @@ import { downloadIcs } from '../../lib/ics.js';
 import * as outbox from '../../lib/outbox.js';
 import '../../styles/calendar.css';
 import { enterSubmit } from '../../lib/imeSubmit.js';
+import DateInput from '../../lib/DateInput.jsx';
 
 const MAX_CHIPS = 3;
 // Drag snapping. 15 minutes matches the granularity a study block is actually
@@ -1001,11 +1002,11 @@ function PlanEditor({ draft, courses, onSave, onDelete, onDeleteSeries, onLog, o
         <div className="plan-row">
           <div className="input-group">
             <div className="input-label">{t('cal.planDate')}</div>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <DateInput type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
           <div className="input-group">
             <div className="input-label">{t('cal.planStart')}</div>
-            <input type="time" step="900" value={start} onChange={(e) => setStart(e.target.value)} />
+            <DateInput type="time" step="900" value={start} onChange={(e) => setStart(e.target.value)} />
           </div>
           <div className="input-group">
             <div className="input-label">{t('cal.planDuration')}</div>
@@ -1191,22 +1192,22 @@ function CommitmentEditor({ draft, onSave, onDelete, onClose, t }) {
         <div className="plan-row">
           <div className="input-group">
             <div className="input-label">{weekly ? t('cm.fFrom') : t('cal.planDate')}</div>
-            <input type="date" value={startsOn} onChange={(ev) => { setStartsOn(ev.target.value); setErr(''); }} />
+            <DateInput type="date" value={startsOn} onChange={(ev) => { setStartsOn(ev.target.value); setErr(''); }} />
           </div>
           <div className="input-group">
             <div className="input-label">{t('tt.fStart')}</div>
-            <input type="time" step="300" value={start} onChange={(ev) => { setStart(ev.target.value); setErr(''); }} />
+            <DateInput type="time" step="300" value={start} onChange={(ev) => { setStart(ev.target.value); setErr(''); }} />
           </div>
           <div className="input-group">
             <div className="input-label">{t('tt.fEnd')}</div>
-            <input type="time" step="300" value={end} onChange={(ev) => { setEnd(ev.target.value); setErr(''); }} />
+            <DateInput type="time" step="300" value={end} onChange={(ev) => { setEnd(ev.target.value); setErr(''); }} />
           </div>
         </div>
 
         {weekly && (
           <div className="input-group">
             <div className="input-label">{t('cm.fUntil')}</div>
-            <input type="date" value={endsOn} onChange={(ev) => { setEndsOn(ev.target.value); setErr(''); }} />
+            <DateInput type="date" value={endsOn} onChange={(ev) => { setEndsOn(ev.target.value); setErr(''); }} />
             {/* An empty end date is the normal state for a club you have not
                 decided the last week of, so it is described rather than
                 treated as an omission. */}

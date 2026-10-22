@@ -17,6 +17,7 @@ import { ASSIGN_TYPES, OTHER_ASSIGN_TYPE } from '../../lib/assignTypes.js';
 import { DIFFICULTY_DAYS, DIFFICULTY_COLORS } from '../../lib/examDifficulty.js';
 import { addDays, fmtDateFull } from '../../lib/dates.js';
 import { enterSubmit } from '../../lib/imeSubmit.js';
+import DateInput from '../../lib/DateInput.jsx';
 
 export function AddAsgnModal({ courses, activeCourse, onAdd, onClose }) {
   const { t } = useTranslation();
@@ -45,8 +46,8 @@ export function AddAsgnModal({ courses, activeCourse, onAdd, onClose }) {
         offering it. Optional throughout: most assignments are due "that day"
         and always have been. */}
     <div className="modal-grid">
-      <div className="input-group"><div className="input-label">{t('av.md.dueDateOpt')}</div><input type="date" value={dueDate} onChange={e=>setDueDate(e.target.value)}/></div>
-      <div className="input-group"><div className="input-label">{t('av.md.dueTimeOpt')}</div><input type="time" value={dueTime} disabled={!dueDate} onChange={e=>setDueTime(e.target.value)}/></div>
+      <div className="input-group"><div className="input-label">{t('av.md.dueDateOpt')}</div><DateInput type="date" value={dueDate} onChange={e=>setDueDate(e.target.value)}/></div>
+      <div className="input-group"><div className="input-label">{t('av.md.dueTimeOpt')}</div><DateInput type="time" value={dueTime} disabled={!dueDate} onChange={e=>setDueTime(e.target.value)}/></div>
     </div>
     <div className="input-group"><div className="input-label">{t('av.md.notesOpt')}</div><textarea placeholder={t('av.md.asgnNotesPh')} value={notes} onChange={e=>setNotes(e.target.value)} style={{minHeight:60}}/></div>
     <div style={{display:"flex",gap:8,marginTop:4}}><button className="btn" onClick={submit}>{t('av.md.addAssignment')}</button><button className="btn-outline" onClick={onClose}>{t('common.cancel')}</button></div>
@@ -62,7 +63,7 @@ export function AddExamModal({ courses, activeCourse, onAdd, onClose }) {
     <div className="input-group"><div className="input-label">{t('av.md.examSubject')}</div><input type="text" placeholder={t('av.md.examTitlePh')} value={title} onChange={e=>setTitle(e.target.value)} autoFocus/></div>
     <div className="modal-grid">
       <div className="input-group"><div className="input-label">{t('av.md.course')}</div><select value={courseId} onChange={e=>setCourse(e.target.value)}>{courses.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-      <div className="input-group"><div className="input-label">{t('av.md.examDate')}</div><input type="date" value={dueDate} onChange={e=>setDueDate(e.target.value)}/></div>
+      <div className="input-group"><div className="input-label">{t('av.md.examDate')}</div><DateInput type="date" value={dueDate} onChange={e=>setDueDate(e.target.value)}/></div>
     </div>
     <div className="input-group"><div className="input-label">{t('av.md.difficultyLabel')}</div>
       <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>

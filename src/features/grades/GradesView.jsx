@@ -12,6 +12,7 @@ import {
 } from '../../lib/gradeWeight.js';
 import PastCourseModal from './PastCourseModal.jsx';
 import { toLocalISO } from '../../lib/dates.js';
+import DateInput from '../../lib/DateInput.jsx';
 
 // Grade rows go straight to Supabase, where `id` is a strict UUID column.
 // crypto.randomUUID() is browser-native (since Chromium 92 / 2021) — Capacitor's
@@ -555,7 +556,7 @@ function GradeEditModal({ mode, scale, subjects, archivedSubjects = [], allGrade
         </div>
         <div className="input-group">
           <div className="input-label">{t('gv.fDate')}</div>
-          <input type="date" value={date || ''} onChange={(e) => setDate(e.target.value)} {...enterSubmit(submit)} />
+          <DateInput type="date" value={date || ''} onChange={(e) => setDate(e.target.value)} {...enterSubmit(submit)} />
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center' }}>
           <button className="btn" onClick={submit}>{isEdit ? t('common.save') : t('gv.bAdd')}</button>

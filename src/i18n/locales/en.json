@@ -1180,5 +1180,15 @@
     "versions": "Update from {{current}} to {{latest}}",
     "open": "Get it on F-Droid",
     "later": "Later"
+  },
+  "dtp": {
+    "date": "Date",
+    "time": "Time",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "hour": "Hour",
+    "minute": "Minute",
+    "clear": "Clear",
+    "set": "Set"
   }
 }

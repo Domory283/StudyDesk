@@ -1189,5 +1189,15 @@
     "versions": "Actualizar de {{current}} a {{latest}}",
     "open": "Descargar en F-Droid",
     "later": "Más tarde"
+  },
+  "dtp": {
+    "date": "Fecha",
+    "time": "Hora",
+    "prevMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "hour": "Hora",
+    "minute": "Minuto",
+    "clear": "Borrar",
+    "set": "Aceptar"
   }
 }

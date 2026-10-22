@@ -1180,5 +1180,15 @@
     "versions": "{{current}} से {{latest}} पर अपडेट करें",
     "open": "F-Droid से पाएँ",
     "later": "बाद में"
+  },
+  "dtp": {
+    "date": "तारीख",
+    "time": "समय",
+    "prevMonth": "पिछला महीना",
+    "nextMonth": "अगला महीना",
+    "hour": "घंटा",
+    "minute": "मिनट",
+    "clear": "साफ़ करें",
+    "set": "सेट करें"
   }
 }
