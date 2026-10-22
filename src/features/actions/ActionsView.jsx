@@ -5,6 +5,8 @@ import { useScrollSelectedIntoView } from "../../lib/useScrollSelectedIntoView.j
 import { daysUntil } from "../../lib/deadlines.js";
 import { enterSubmit } from "../../lib/imeSubmit.js";
 import FirstSteps from "../onboarding/FirstSteps.jsx";
+import { fmtTime } from "../../lib/dates.js";
+import { openPlansBetween } from "../../lib/planRun.js";
 
 const BUCKETS = ["today", "this_week", "later"];
 const BUCKET_COLORS = {
@@ -14,7 +16,7 @@ const BUCKET_COLORS = {
 };
 
 // ── ActionsView — Next Up ─────────────────────────────────────────────────────
-export default function ActionsView({ state, dispatch, showFlash, onAddCourse, onFirstStep }) {
+export default function ActionsView({ state, dispatch, showFlash, onAddCourse, onFirstStep, onStartPlan }) {
   const { t, i18n } = useTranslation();
   const currentLang = (i18n.language || "en").split("-")[0];
   const langRef = useScrollSelectedIntoView();
@@ -70,6 +72,11 @@ export default function ActionsView({ state, dispatch, showFlash, onAddCourse, o
     stale.forEach(a => dispatch({type:"DELETE_ACTION", id:a.id}));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const todayPlans = (() => {
+    const start = new Date(now); start.setHours(0, 0, 0, 0);
+    const end = new Date(start); end.setDate(end.getDate() + 1);
+    return openPlansBetween(state.plannedSessions, start.getTime(), end.getTime());
+  })();
   const allActions = [...visibleManual, ...suggestedActions.filter(s=>!visibleManual.some(a=>a.sourceId===s.sourceId&&a.suggested))];
   const addAction = () => { if(!newText.trim()) return; dispatch({type:"ADD_ACTION",text:newText.trim(),bucket:newBucket,courseId:newCourse||null}); setNewText(""); showFlash(t('av.act.addedToNextUp')); };
   // v1.5 (5D) — empty-period / first-run re-onboarding: no active courses to plan around.
@@ -126,6 +133,24 @@ export default function ActionsView({ state, dispatch, showFlash, onAddCourse, o
         carry their own prompt and stacking a second would be the wizard this
         deliberately is not. */}
     <FirstSteps state={state} onGo={onFirstStep}/>
+    {/* v1.19 (#185) — today's scheduled blocks that are still owed, each
+        startable in the timer. A block run that way saves as the block's one
+        session, so nothing here can make a duplicate. */}
+    {todayPlans.length>0&&<div className="bucket-section">
+      <div className="bucket-header"><div className="bucket-dot" style={{background:BUCKET_COLORS.today.bg}}/>{t('pr.todayBlocks')}</div>
+      {todayPlans.map(p=>{
+        const c=p.subjectId?state.courses[p.subjectId]:null;
+        return <div key={p.id} className="action-item">
+          <span aria-hidden="true" style={{width:8,height:8,borderRadius:"50%",flexShrink:0,background:c?.color||"var(--border2)"}}/>
+          <div className="action-text">
+            <span style={{fontFamily:"var(--font-mono)",fontSize:12,color:"var(--muted)",marginInlineEnd:8}}>{fmtTime(p.startsAt)}</span>
+            {p.title||c?.name||t('notif.planFallback')}
+            <span style={{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--muted2)",marginInlineStart:8}}>{t('pr.minutes',{n:p.durationMinutes})}</span>
+          </div>
+          <button className="btn btn-sm" onClick={()=>onStartPlan?.(p.id)}>{t('pr.start')}</button>
+        </div>;
+      })}
+    </div>}
     {BUCKETS.map(bucket=>{
       const items=allActions.filter(a=>a.bucket===bucket);
       if(items.length===0) return null;

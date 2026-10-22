@@ -1180,5 +1180,18 @@
     "versions": "{{current}} से {{latest}} पर अपडेट करें",
     "open": "F-Droid से पाएँ",
     "later": "बाद में"
+  },
+  "pr": {
+    "start": "शुरू करें",
+    "startFocus": "फ़ोकस शुरू करें",
+    "snooze": "5 मिनट बाद",
+    "skip": "छोड़ें",
+    "notNow": "अभी नहीं",
+    "startsNow": "अध्ययन ब्लॉक · अभी",
+    "scheduledFor": "अध्ययन ब्लॉक · {{time}}",
+    "minutes": "{{n}} मिनट",
+    "runLabel": "इसमें गिना जाएगा: {{title}}",
+    "endRun": "इस ब्लॉक में गिनना बंद करें",
+    "todayBlocks": "आज के अध्ययन ब्लॉक"
   }
 }

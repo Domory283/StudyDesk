@@ -1180,5 +1180,18 @@
     "versions": "Päivitä versiosta {{current}} versioon {{latest}}",
     "open": "Hae F-Droidista",
     "later": "Myöhemmin"
+  },
+  "pr": {
+    "start": "Aloita",
+    "startFocus": "Aloita keskittyminen",
+    "snooze": "Torkku 5 min",
+    "skip": "Ohita",
+    "notNow": "Ei nyt",
+    "startsNow": "Opiskelulohko · nyt",
+    "scheduledFor": "Opiskelulohko · {{time}}",
+    "minutes": "{{n}} min",
+    "runLabel": "Lasketaan lohkoon: {{title}}",
+    "endRun": "Lopeta laskeminen tähän lohkoon",
+    "todayBlocks": "Tämän päivän opiskelulohkot"
   }
 }

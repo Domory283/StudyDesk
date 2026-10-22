@@ -1176,5 +1176,18 @@
     "versions": "从 {{current}} 更新到 {{latest}}",
     "open": "前往 F-Droid 获取",
     "later": "稍后"
+  },
+  "pr": {
+    "start": "开始",
+    "startFocus": "开始专注",
+    "snooze": "5 分钟后提醒",
+    "skip": "跳过",
+    "notNow": "暂不",
+    "startsNow": "学习时段 · 现在",
+    "scheduledFor": "学习时段 · {{time}}",
+    "minutes": "{{n}} 分钟",
+    "runLabel": "计入：{{title}}",
+    "endRun": "不再计入此时段",
+    "todayBlocks": "今天的学习时段"
   }
 }

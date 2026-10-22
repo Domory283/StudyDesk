@@ -1180,5 +1180,18 @@
     "versions": "Update von {{current}} auf {{latest}}",
     "open": "Auf F-Droid holen",
     "later": "Später"
+  },
+  "pr": {
+    "start": "Starten",
+    "startFocus": "Fokus starten",
+    "snooze": "5 Min. später",
+    "skip": "Überspringen",
+    "notNow": "Nicht jetzt",
+    "startsNow": "Lernblock · jetzt",
+    "scheduledFor": "Lernblock · {{time}}",
+    "minutes": "{{n}} Min.",
+    "runLabel": "Zählt für: {{title}}",
+    "endRun": "Nicht mehr für diesen Block zählen",
+    "todayBlocks": "Lernblöcke heute"
   }
 }

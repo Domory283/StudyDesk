@@ -1180,5 +1180,18 @@
     "versions": "Update from {{current}} to {{latest}}",
     "open": "Get it on F-Droid",
     "later": "Later"
+  },
+  "pr": {
+    "start": "Start",
+    "startFocus": "Start focus",
+    "snooze": "Snooze 5 min",
+    "skip": "Skip",
+    "notNow": "Not now",
+    "startsNow": "Study block · now",
+    "scheduledFor": "Study block · {{time}}",
+    "minutes": "{{n}} min",
+    "runLabel": "Counts toward: {{title}}",
+    "endRun": "Stop counting toward this block",
+    "todayBlocks": "Study blocks today"
   }
 }

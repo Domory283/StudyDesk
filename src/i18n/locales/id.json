@@ -1171,5 +1171,18 @@
     "versions": "Perbarui dari {{current}} ke {{latest}}",
     "open": "Dapatkan di F-Droid",
     "later": "Nanti"
+  },
+  "pr": {
+    "start": "Mulai",
+    "startFocus": "Mulai fokus",
+    "snooze": "Tunda 5 mnt",
+    "skip": "Lewati",
+    "notNow": "Nanti saja",
+    "startsNow": "Blok belajar · sekarang",
+    "scheduledFor": "Blok belajar · {{time}}",
+    "minutes": "{{n}} mnt",
+    "runLabel": "Dihitung untuk: {{title}}",
+    "endRun": "Berhenti menghitung untuk blok ini",
+    "todayBlocks": "Blok belajar hari ini"
   }
 }

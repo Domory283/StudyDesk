@@ -1189,5 +1189,18 @@
     "versions": "Actualizar de {{current}} a {{latest}}",
     "open": "Descargar en F-Droid",
     "later": "Más tarde"
+  },
+  "pr": {
+    "start": "Empezar",
+    "startFocus": "Empezar enfoque",
+    "snooze": "Posponer 5 min",
+    "skip": "Omitir",
+    "notNow": "Ahora no",
+    "startsNow": "Bloque de estudio · ahora",
+    "scheduledFor": "Bloque de estudio · {{time}}",
+    "minutes": "{{n}} min",
+    "runLabel": "Cuenta para: {{title}}",
+    "endRun": "Dejar de contar para este bloque",
+    "todayBlocks": "Bloques de estudio de hoy"
   }
 }
