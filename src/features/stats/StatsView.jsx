@@ -1,14 +1,14 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { calculateGPA, subjectsWithEffectiveGrades } from '../../lib/gpa.js';
 import { preferredDayStart, studyDayKey, todayStudyDayKey, shiftDayKey } from '../../lib/studyDay.js';
+import { summarizeGradeActivities } from '../../lib/pointsGrades.js';
 
 // ── BUG-21: Study Statistics Dashboard ───────────────────────────────────────
 //
 // StudyDesk is now the only home for study data (NCC's studies overview was
 // removed in v1.3). This view surfaces what the user can no longer see in the
 // hub: weekly study load, where the time goes (subject split), consistency
-// (streak), and where the GPA is trending. All data is already local +
+// (streak), and how earned points are accumulating. All data is already local +
 // synced — this is a pure read/derive surface. Cream-paper aesthetic, in line
 // with the rest of the app.
 
@@ -67,7 +67,6 @@ function weekStart(d) {
 
 export default function StatsView({ state }) {
   const { t } = useTranslation();
-  const mode = state.gradeMode || 'ib';
   // Read once per mount rather than per render: this is a localStorage-backed
   // preference that only Settings writes, and re-reading it mid-render would
   // make the streak a function of something React cannot see change.
@@ -153,28 +152,20 @@ export default function StatsView({ state }) {
     return { count, last14 };
   }, [sessions, dayStart]);
 
-  // ── GPA trend: cumulative GPA per month over the trailing window ───────────
-  const gpaTrend = useMemo(() => {
-    // Include archived courses: this trend is HISTORICAL, so archiving a
-    // finished semester must NOT retroactively erase its grades from past
-    // months' data points (they're only soft-flagged, not deleted).
-    const trendCourses = Object.values(state.courses || {}).filter((c) => !c.deletedAt);
-    const coursesMap = {};
-    for (const c of trendCourses) coursesMap[c.id] = c;
-    const grades = (state.grades || []).filter((g) => !g.deletedAt && g.date);
-    if (grades.length === 0) return { points: [], min: 0, max: 0 };
-
-    // Bucket grades by month, build cumulative GPA at each month boundary.
-    const months = Array.from(new Set(grades.map((g) => g.date.slice(0, 7)))).sort();
+  // ── Cumulative earned points by month ──────────────────────────────────────
+  const pointTrend = useMemo(() => {
+    const activities = (state.gradeActivities || [])
+      .filter((activity) => !activity.deletedAt && activity.status === 'graded' && activity.date);
+    if (!activities.length) return { points: [], min: 0, max: 0 };
+    const months = Array.from(new Set(activities.map((activity) => activity.date.slice(0, 7)))).sort();
     const points = months.map((m) => {
-      const upTo = grades.filter((g) => g.date.slice(0, 7) <= m);
-      const aggregates = subjectsWithEffectiveGrades(coursesMap, upTo);
-      return { month: m, gpa: calculateGPA(aggregates, mode) };
-    }).filter((p) => Number.isFinite(p.gpa) && p.gpa > 0);
+      const upTo = activities.filter((activity) => activity.date.slice(0, 7) <= m);
+      return { month: m, points: summarizeGradeActivities(upTo).obtained };
+    }).filter((point) => Number.isFinite(point.points));
 
-    const vals = points.map((p) => p.gpa);
+    const vals = points.map((point) => point.points);
     return { points, min: Math.min(...vals), max: Math.max(...vals) };
-  }, [state.courses, state.grades, mode]);
+  }, [state.gradeActivities]);
 
   // ── v1.4 AI debrief insights: avg comprehension + recurring confusion ──────
   const aiInsights = useMemo(() => {
@@ -325,22 +316,22 @@ export default function StatsView({ state }) {
           </div>
         </div>
 
-        {/* GPA trend */}
+        {/* Semester points trend */}
         <div className="st-card">
           <div className="st-card-head">
-            <span className="st-card-title">{mode === 'us' ? t('st.gpaTrend') : t('st.ibTrend')}</span>
-            <span className="st-card-note">{mode === 'us' ? t('st.usScale') : t('st.ibScale')}</span>
+            <span className="st-card-title">{t('st.pointsTrend')}</span>
+            <span className="st-card-note">{t('st.pointsAcrossCourses')}</span>
           </div>
-          {gpaTrend.points.length < 2 ? (
+          {pointTrend.points.length < 2 ? (
             <div className="st-empty">
               {t('st.trendNeedMore')}
             </div>
           ) : (
-            <GpaSparkline points={gpaTrend.points} min={gpaTrend.min} max={gpaTrend.max} />
+            <PointsSparkline points={pointTrend.points} min={pointTrend.min} max={pointTrend.max} />
           )}
         </div>
 
-        {!hasAnySessions && gpaTrend.points.length === 0 && (
+        {!hasAnySessions && pointTrend.points.length === 0 && (
           <div className="st-empty" style={{ textAlign: 'center', paddingTop: 28 }}>
             {t('st.emptyAll')}
           </div>
@@ -350,16 +341,15 @@ export default function StatsView({ state }) {
   );
 }
 
-function GpaSparkline({ points, min, max }) {
+function PointsSparkline({ points, min, max }) {
   const W = 320, H = 90, padX = 8, padY = 12;
-  // Pad the value range so a flat line doesn't sit on the floor/ceiling.
-  const lo = Math.floor(min * 10) / 10 - 0.1;
-  const hi = Math.ceil(max * 10) / 10 + 0.1;
-  const span = Math.max(0.1, hi - lo);
+  const lo = Math.max(0, Math.floor(min / 10) * 10 - 10);
+  const hi = Math.ceil(max / 10) * 10 + 10 || 10;
+  const span = Math.max(10, hi - lo);
   const n = points.length;
   const x = (i) => padX + (i / (n - 1)) * (W - padX * 2);
   const y = (v) => padY + (1 - (v - lo) / span) * (H - padY * 2);
-  const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(p.gpa).toFixed(1)}`).join(' ');
+  const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(p.points).toFixed(1)}`).join(' ');
   const last = points[n - 1];
 
   return (
@@ -367,7 +357,7 @@ function GpaSparkline({ points, min, max }) {
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" preserveAspectRatio="none" style={{ display: 'block' }}>
         <path d={path} fill="none" stroke="var(--text)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
         {points.map((p, i) => (
-          <circle key={i} cx={x(i)} cy={y(p.gpa)} r={i === n - 1 ? 3.5 : 2} fill="var(--text)" />
+          <circle key={i} cx={x(i)} cy={y(p.points)} r={i === n - 1 ? 3.5 : 2} fill="var(--text)" />
         ))}
       </svg>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
@@ -375,7 +365,7 @@ function GpaSparkline({ points, min, max }) {
           {points[0].month}
         </span>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16 }}>
-          {last.gpa.toFixed(2)}
+          {last.points.toFixed(2)} / 500
         </span>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted2)' }}>
           {last.month}

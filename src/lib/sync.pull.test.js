@@ -15,7 +15,7 @@ vi.mock('./supabase.js', () => ({
 const { pullAllStudyData } = await import('./sync.js');
 
 const TABLES = [
-  'subjects', 'grades', 'study_sessions', 'assignments', 'exams', 'study_actions',
+  'subjects', 'grades', 'grade_activities', 'study_sessions', 'assignments', 'exams', 'study_actions',
   'planned_sessions', 'academic_terms', 'timetable_entries', 'assignment_attachments',
   'commitments', 'notebook_entries', 'notebook_attachments', 'lesson_attendance',
 ];
@@ -63,16 +63,14 @@ describe('pullAllStudyData', () => {
     expect(remote.notes).toHaveLength(4);
     expect(Object.keys(remote).sort()).toEqual([
       'academicTerms', 'actions', 'assignments', 'attachments', 'attendance',
-      'commitments', 'exams', 'grades', 'noteAttachments', 'notes',
+      'commitments', 'exams', 'gradeActivities', 'grades', 'noteAttachments', 'notes',
       'plannedSessions', 'sessions', 'subjects', 'timetableEntries',
     ]);
   });
 
-  it('still tolerates a missing notebook or attendance table', async () => {
-    // The 1.13 window: a newer app against a database the owner has not
-    // migrated yet. Paging must not turn "feature not there yet" into
-    // "sync is broken".
+  it('still tolerates missing optional tables before their migrations are applied', async () => {
     const tables = seed();
+    delete tables.grade_activities;
     delete tables.notebook_entries;
     delete tables.notebook_attachments;
     delete tables.lesson_attendance;
@@ -80,6 +78,7 @@ describe('pullAllStudyData', () => {
     const remote = await pullAllStudyData();
     expect(remote.notes).toEqual([]);
     expect(remote.attendance).toEqual([]);
+    expect(remote.gradeActivities).toEqual([]);
     expect(remote.subjects).toHaveLength(3);
   });
 

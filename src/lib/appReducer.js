@@ -16,7 +16,7 @@ export function newSyncId() { return crypto.randomUUID(); }
 
 export const INITIAL = {
   courses:{}, assignments:[], actions:[], exams:[],
-  grades:[], studySessions:[],
+  grades:[], gradeActivities:[], studySessions:[],
   // v1.10 — planned study blocks, the School Year > Semester > Jakso tree, the
   // weekly lessons hanging off it, and assignment file attachments.
   // `plannedSessions` is separate from `studySessions` on purpose and must
@@ -37,6 +37,7 @@ export const INITIAL = {
   attendance:[],
   gradeMode:"ib",                  // 'ib' | 'us' | 'custom' — persisted locally
   customScale:DEFAULT_CUSTOM_SCALE, // bounds for gradeMode 'custom' (SD-F4)
+  pointsPassMark:null,             // optional 0–5 threshold for the point-based semester view
   aiEnabled:false,                 // AI debrief opt-in — device-level, persisted locally
   // v1.10 (Item 12) — Lock In's two native additions, independent on purpose.
   // The chip is harmless so it defaults on; screen pinning traps the user in
@@ -122,6 +123,7 @@ export function reducer(state, action) {
         ...state,
         courses,
         grades:state.grades.map(g=>g.subjectId===action.id?{...g,deletedAt:stamp,updatedAt:stamp}:g),
+        gradeActivities:(state.gradeActivities||[]).map(activity=>activity.subjectId===action.id?{...activity,deletedAt:stamp,updatedAt:stamp}:activity),
         assignments:state.assignments.filter(a=>a.courseId!==action.id),
         exams:state.exams.filter(e=>e.courseId!==action.id),
         activeCourse:state.activeCourse===action.id?null:state.activeCourse,
@@ -215,6 +217,51 @@ export function reducer(state, action) {
     case "ADD_GRADE":    { const g={id:action.id||newSyncId(),subjectId:action.subjectId,grade:Number(action.grade),weight:Number(action.weight??1),date:action.date||toLocalISO(new Date()), /* v1.18.1 (#151): local date, not UTC */updatedAt:action.updatedAt||stampNow(),deletedAt:null}; return {...state,grades:[...(state.grades||[]),g]}; }
     case "EDIT_GRADE":   return {...state,grades:(state.grades||[]).map(g=>g.id===action.id?{...g,subjectId:action.subjectId??g.subjectId,grade:action.grade!==undefined?Number(action.grade):g.grade,weight:action.weight!==undefined?Number(action.weight):g.weight,date:action.date??g.date,updatedAt:stampNow()}:g)};
     case "DELETE_GRADE": { const stamp=stampNow(); return {...state,grades:(state.grades||[]).map(g=>g.id===action.id?{...g,deletedAt:stamp,updatedAt:stamp}:g)}; }
+    case "ADD_GRADE_ACTIVITY": {
+      const activity = {
+        id: action.id || newSyncId(),
+        subjectId: action.subjectId,
+        cut: Number(action.cut),
+        title: String(action.title || '').trim(),
+        earnedPoints: action.status === 'graded' ? Number(action.earnedPoints) : null,
+        maxPoints: Number(action.maxPoints),
+        status: action.status,
+        date: action.date || toLocalISO(new Date()),
+        allowOverCapacity: Boolean(action.allowOverCapacity),
+        updatedAt: action.updatedAt || stampNow(),
+        deletedAt: null,
+      };
+      return { ...state, gradeActivities: [...(state.gradeActivities || []), activity] };
+    }
+    case "EDIT_GRADE_ACTIVITY": return {
+      ...state,
+      gradeActivities: (state.gradeActivities || []).map((activity) => activity.id === action.id
+        ? {
+          ...activity,
+          subjectId: action.subjectId ?? activity.subjectId,
+          cut: action.cut !== undefined ? Number(action.cut) : activity.cut,
+          title: action.title !== undefined ? String(action.title).trim() : activity.title,
+          earnedPoints: action.status === 'graded'
+            ? Number(action.earnedPoints)
+            : action.status !== undefined ? null : activity.earnedPoints,
+          maxPoints: action.maxPoints !== undefined ? Number(action.maxPoints) : activity.maxPoints,
+          status: action.status ?? activity.status,
+          date: action.date ?? activity.date,
+          allowOverCapacity: action.allowOverCapacity !== undefined
+            ? Boolean(action.allowOverCapacity) : activity.allowOverCapacity,
+          updatedAt: stampNow(),
+        }
+        : activity),
+    };
+    case "DELETE_GRADE_ACTIVITY": {
+      const stamp = stampNow();
+      return {
+        ...state,
+        gradeActivities: (state.gradeActivities || []).map((activity) => activity.id === action.id
+          ? { ...activity, deletedAt: stamp, updatedAt: stamp }
+          : activity),
+      };
+    }
 
     // ── Study sessions ──
     case "ADD_SESSION":    { const s={id:action.id||newSyncId(),subjectId:action.subjectId||null,startedAt:action.startedAt,durationMinutes:Math.max(1,Math.min(1440,Math.round(action.durationMinutes))),notes:action.notes||null,focusRating:action.focusRating!=null?Math.max(1,Math.min(5,Math.round(action.focusRating))):null,aiDebriefRaw:action.aiDebriefRaw??null,aiSubjectCovered:action.aiSubjectCovered??null,aiComprehension:action.aiComprehension!=null?Math.max(1,Math.min(5,Math.round(action.aiComprehension))):null,aiConfusionFlags:Array.isArray(action.aiConfusionFlags)?action.aiConfusionFlags:null,aiSessionSummary:action.aiSessionSummary??null,updatedAt:action.updatedAt||stampNow(),deletedAt:null}; return {...state,studySessions:[...(state.studySessions||[]),s]}; }
@@ -440,6 +487,12 @@ export function reducer(state, action) {
     // error anywhere. Validated against the known set instead.
     case "SET_GRADE_MODE":
       return {...state, gradeMode: isGradeMode(action.mode) ? action.mode : state.gradeMode};
+    case "SET_POINTS_PASS_MARK": {
+      if (action.value == null || action.value === '') return { ...state, pointsPassMark: null };
+      const value = Number(action.value);
+      if (!Number.isFinite(value) || value < 0 || value > 5) return state;
+      return { ...state, pointsPassMark: value };
+    }
     case "SET_CUSTOM_SCALE":
       return {...state, customScale: normalizeScale(action.scale)};
     case "SET_AI_ENABLED": return {...state,aiEnabled:!!action.on};

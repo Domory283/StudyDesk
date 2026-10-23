@@ -41,6 +41,7 @@ import { serverNow } from './serverClock.js';
 export const STAMPED_KINDS = {
   upsert_subject: 'subjects',
   upsert_grade: 'grades',
+  upsert_grade_activity: 'grade_activities',
   log_session: 'study_sessions',
   update_session: 'study_sessions',
   upsert_assignment: 'assignments',
@@ -62,6 +63,7 @@ export const STAMPED_KINDS = {
 const PULLED = {
   subjects: 'subjects',
   grades: 'grades',
+  gradeActivities: 'grade_activities',
   sessions: 'study_sessions',
   assignments: 'assignments',
   exams: 'exams',

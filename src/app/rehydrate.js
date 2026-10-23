@@ -211,6 +211,7 @@ export function rehydrateState(init) {
       exams: migratedExams,
       actions: migratedActions,
       grades: migratedGrades,
+      gradeActivities: Array.isArray(saved.gradeActivities) ? saved.gradeActivities : [],
       studySessions: migratedSessions,
       // v1.10. No UUID migration pass for these four: they were born after
       // v1.0.4, so every id they have ever held came from crypto.randomUUID.

@@ -22,7 +22,6 @@ import CalendarFeeds from './CalendarFeeds.jsx';
 import { downloadExport, deleteAccount } from '../../lib/dataRights.js';
 import { useConfirm } from '../../lib/useConfirm.js';
 import { focusCapabilities, ensureNotificationPermission } from '../../lib/focusMode.js';
-import { scaleFor, normalizeScale, describeScale, SCALE_PRESETS } from '../../lib/gradeScale.js';
 import { preferredWeekStart, setPreferredWeekStart, resolveWeekStart, weekdayLabels } from '../../lib/calendar.js';
 import { preferredDayStart, setPreferredDayStart, DAY_START_CHOICES } from '../../lib/studyDay.js';
 import { preferredDueWindow, setPreferredDueWindow, DUE_WINDOW_CHOICES } from '../../lib/dueWindow.js';
@@ -457,22 +456,9 @@ export default function SettingsView({ state, dispatch, showFlash, session }) {
 
   const subjects = Object.values(state.courses || {}).filter((c) => !c.deletedAt);
   const grades = (state.grades || []).filter((g) => !g.deletedAt);
+  const gradeActivities = (state.gradeActivities || []).filter((activity) => !activity.deletedAt);
   const sessions = (state.studySessions || []).filter((s) => !s.deletedAt);
 
-  const mode = state.gradeMode || 'ib';
-  // The draft holds raw strings so a half-typed value survives a keystroke:
-  // normalising on every change would snap an emptied field back to its default
-  // and make the input impossible to edit. The reducer always receives the
-  // normalised value, so the rest of the app never sees a partial scale.
-  const [scaleDraft, setScaleDraft] = useState(() => ({ ...scaleFor('custom', state.customScale) }));
-  const activeScale = normalizeScale(scaleDraft);
-  const setScale = useCallback((patch) => {
-    setScaleDraft((prev) => {
-      const next = { ...prev, ...patch };
-      dispatch({ type: 'SET_CUSTOM_SCALE', scale: next });
-      return next;
-    });
-  }, [dispatch]);
 
   // Goes through the outbox rather than straight to Supabase, so a report
   // written on a train is not lost — enqueue persists first and drains on the
@@ -1261,120 +1247,10 @@ export default function SettingsView({ state, dispatch, showFlash, session }) {
         </div>
         )}
 
-        {/* ── Grades ── */}
-        <div className="sv2-section">
-          <div className="sv2-section-title">{t('settings.gradesLbl')}</div>
-          <div className="sv2-row">
-            <span className="sv2-row-label">{t('settings.gradeScale')}</span>
-            <span className="sv2-row-value">
-              <span className="sv2-mode">
-                <button className={mode === 'ib' ? 'active' : ''} onClick={() => dispatch({ type: 'SET_GRADE_MODE', mode: 'ib' })}>IB</button>
-                <button className={mode === 'us' ? 'active' : ''} onClick={() => dispatch({ type: 'SET_GRADE_MODE', mode: 'us' })}>US</button>
-                <button className={mode === 'custom' ? 'active' : ''} onClick={() => dispatch({ type: 'SET_GRADE_MODE', mode: 'custom' })}>{t('gv.modeCustom')}</button>
-              </span>
-            </span>
-          </div>
-          {/* SD-F4 — the editor only appears once Custom is the active mode, so
-              the section stays a single row for the IB and US majority. */}
-          {mode === 'custom' && (
-            <div className="sv2-scale">
-              {/* v1.14 Item 2 — above the fields, not below them: the point is
-                  to be seen before someone starts typing four numbers. */}
-              {/* Two groups under two labels, because one label cannot be
-                  honest about both. A scale chip is something you START FROM
-                  and then edit; a mode chip SWITCHES AWAY from Custom to a
-                  scale that already exists in its own right, and calling that
-                  "start from" would describe the opposite of what it does. */}
-              <div className="sv2-scale-presets">
-                <span className="sv2-row-label">{t('settings.scalePresets')}</span>
-                {SCALE_PRESETS.filter((p) => !p.mode).map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    className="sv2-preset"
-                    onClick={() => setScale(p.scale)}
-                  >
-                    {t(p.labelKey)}
-                  </button>
-                ))}
-              </div>
-              <div className="sv2-scale-presets">
-                <span className="sv2-row-label">{t('settings.scaleSwitchTo')}</span>
-                {SCALE_PRESETS.filter((p) => p.mode).map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    className="sv2-preset sv2-preset-mode"
-                    onClick={() => dispatch({ type: 'SET_GRADE_MODE', mode: p.mode })}
-                  >
-                    {t(p.labelKey)}
-                  </button>
-                ))}
-              </div>
-              <label className="sv2-scale-field">
-                <span>{t('settings.scaleMin')}</span>
-                <input
-                  type="number" step="0.5" value={scaleDraft.min}
-                  onChange={(e) => setScale({ min: e.target.value })}
-                />
-              </label>
-              <label className="sv2-scale-field">
-                <span>{t('settings.scaleMax')}</span>
-                <input
-                  type="number" step="0.5" value={scaleDraft.max}
-                  onChange={(e) => setScale({ max: e.target.value })}
-                />
-              </label>
-              <label className="sv2-scale-field">
-                <span>{t('settings.scalePass')}</span>
-                <input
-                  type="number" step="0.5" value={scaleDraft.passMark}
-                  onChange={(e) => setScale({ passMark: e.target.value })}
-                />
-              </label>
-                <label className="sv2-scale-field" style={{ flex: '1 1 100%' }}>
-            <span>{t('settings.scaleName')}</span>
-            <input
-              type="text"
-              value={scaleDraft.name || ''}
-              placeholder={t('gv.customAverage')}
-              onChange={(e) => setScale({ name: e.target.value })}
-            />
-          </label>
-        <div className="sv2-scale-dir">
-                <span className="sv2-row-label">{t('settings.scaleDirection')}</span>
-                <span className="sv2-mode">
-                  <button
-                    className={scaleDraft.direction === 'up' ? 'active' : ''}
-                    onClick={() => setScale({ direction: 'up' })}
-                  >
-                    {t('settings.scaleHighBest')}
-                  </button>
-                  <button
-                    className={scaleDraft.direction === 'down' ? 'active' : ''}
-                    onClick={() => setScale({ direction: 'down' })}
-                  >
-                    {t('settings.scaleLowBest')}
-                  </button>
-                </span>
-              </div>
-              <div className="sv2-note">{describeScale(activeScale, t)}</div>
-            </div>
-          )}
-          <div className="sv2-note">
-            {mode === 'custom' ? t('settings.gradeNoteCustom') : t('settings.gradeNote')}
-          </div>
-          {/* v1.14 Item 2 — the other half of the /20 request. The person who
-              asked had not tried Custom and had no reason to think it was for
-              them; a scale they recognise, named in the note they are already
-              reading, is the whole fix. */}
-          {mode !== 'custom' && <div className="sv2-note">{t('settings.gradeCustomHint')}</div>}
-        </div>
-
         {/* ── Period history (Archive) ── */}
         <div className="sv2-section">
           <div className="sv2-section-title">{t('history.title')}</div>
-          <PeriodHistory courses={state.courses} grades={grades} mode={mode} />
+          <PeriodHistory courses={state.courses} gradeActivities={gradeActivities} />
           <div className="sv2-note">{t('history.note')}</div>
         </div>
 

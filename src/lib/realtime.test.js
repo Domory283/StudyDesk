@@ -88,14 +88,22 @@ describe('startRealtime', () => {
 describe('recurrence guard (limecore#24)', () => {
   // The server rejects the WHOLE channel for one unpublished table, which is
   // how live sync stayed dead from v1.7 to v1.17. Binding a new table means
-  // adding it to both migrations below, or writing a new one that does.
+  // adding it to both migrations below, or writing a new migration that does.
   it('every bound table is in the publication migration', () => {
     const published = tablesIn(migration('20261006_realtime_publish.sql'));
+    const activitiesMigration = migration('20261023_grade_activities.sql');
+    if (/alter publication supabase_realtime add table public\.grade_activities/i.test(activitiesMigration)) {
+      published.add('grade_activities');
+    }
     expect(sync.REALTIME_TABLES.filter((t) => !published.has(t))).toEqual([]);
   });
 
   it('every bound table has the echo guard', () => {
     const guarded = tablesIn(migration('20261006_realtime_echo_guard.sql'));
+    const activitiesMigration = migration('20261023_grade_activities.sql');
+    if (/create trigger zz_skip_noop_update[\s\S]*?on public\.grade_activities/i.test(activitiesMigration)) {
+      guarded.add('grade_activities');
+    }
     expect(sync.REALTIME_TABLES.filter((t) => !guarded.has(t))).toEqual([]);
   });
 });

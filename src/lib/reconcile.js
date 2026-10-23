@@ -55,6 +55,7 @@ export function findUnsynced(state, remote) {
   const remoteExams = remoteIds(remote?.exams);
   const remoteAssignments = remoteIds(remote?.assignments);
   const remoteGrades = remoteIds(remote?.grades);
+  const remoteGradeActivities = remoteIds(remote?.gradeActivities);
   // v1.13 Item 1a — see the study-session block below for why these were
   // missing and why that mattered more than the four above.
   const remoteSessions = remoteIds(remote?.sessions);
@@ -152,6 +153,26 @@ export function findUnsynced(state, remote) {
         grade: g.grade,
         weight: g.weight,
         date: g.date,
+      },
+    });
+  }
+
+  for (const activity of state?.gradeActivities || []) {
+    if (!activity?.id || activity.deletedAt || remoteGradeActivities.has(activity.id)) continue;
+    if (!parentWillExist(activity.subjectId)) continue;
+    out.push({
+      kind: 'upsert_grade_activity',
+      payload: {
+        id: activity.id,
+        subjectId: activity.subjectId,
+        cut: activity.cut,
+        title: activity.title,
+        earnedPoints: activity.earnedPoints,
+        maxPoints: activity.maxPoints,
+        status: activity.status,
+        date: activity.date,
+        allowOverCapacity: activity.allowOverCapacity,
+        updatedAt: activity.updatedAt,
       },
     });
   }

@@ -114,6 +114,25 @@ function mergeGrade(localGrade, remoteRow) {
   return localGrade;
 }
 
+function mergeGradeActivity(localActivity, remoteRow) {
+  const remote = {
+    id: remoteRow.id,
+    subjectId: remoteRow.subject_id,
+    cut: Number(remoteRow.academic_cut),
+    title: remoteRow.title,
+    earnedPoints: remoteRow.earned_points == null ? null : Number(remoteRow.earned_points),
+    maxPoints: Number(remoteRow.max_points),
+    status: remoteRow.status,
+    date: remoteRow.date || null,
+    allowOverCapacity: Boolean(remoteRow.allow_over_capacity),
+    updatedAt: remoteRow.updated_at || null,
+    deletedAt: remoteRow.deleted_at || null,
+  };
+  if (!localActivity) return remote;
+  if (remoteWins(remote, localActivity)) return remote;
+  return localActivity;
+}
+
 function mergeSession(localSession, remoteRow) {
   const remote = {
     id: remoteRow.id,
@@ -456,6 +475,12 @@ export function applyRemotePull(state, remote) {
   }
   const grades = Array.from(gradeById.values());
 
+  const activityById = new Map((state.gradeActivities || []).map((activity) => [activity.id, activity]));
+  for (const row of remote.gradeActivities || []) {
+    activityById.set(row.id, mergeGradeActivity(activityById.get(row.id), row));
+  }
+  const gradeActivities = Array.from(activityById.values());
+
   // Sessions → state.studySessions (array).
   const sessionById = new Map((state.studySessions || []).map((s) => [s.id, s]));
   for (const row of remote.sessions) {
@@ -518,7 +543,7 @@ export function applyRemotePull(state, remote) {
 
   return {
     ...state,
-    courses, grades, studySessions, assignments, exams, actions, notes, noteAttachments, attendance,
+    courses, grades, gradeActivities, studySessions, assignments, exams, actions, notes, noteAttachments, attendance,
     plannedSessions, academicTerms, timetableEntries, attachments, commitments,
   };
 }

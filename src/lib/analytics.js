@@ -14,50 +14,36 @@
 import { parseLocalDate, toLocalISO, addDays } from './dates.js';
 import { startOfWeek } from './calendar.js';
 
-/** Weighted mean of `grades`, or null when there is nothing to average. */
-export function weightedMean(grades) {
-  let sum = 0, w = 0;
-  for (const g of grades) {
-    const gw = Number(g.weight);
-    const gv = Number(g.grade);
-    if (!Number.isFinite(gv) || !Number.isFinite(gw) || gw <= 0) continue;
-    sum += gv * gw;
-    w += gw;
-  }
-  return w > 0 ? sum / w : null;
-}
-
-/** Per-subject grade series, oldest first, each point carrying the running
- *  weighted average up to and including it. The running average is what makes
- *  the line readable: raw grades bounce, and the question a student is asking
- *  is "where am I heading", not "what did I get on the third one". */
+/** Per-subject series of graded activities, oldest first, carrying cumulative
+ *  points earned up to each activity. Legacy GPA rows are intentionally excluded. */
 export function gradeSeries(state) {
   const out = [];
   const courses = state.courses || {};
   for (const id of Object.keys(courses)) {
     const c = courses[id];
     if (!c || c.deletedAt) continue;
-    const points = (state.grades || [])
-      .filter((g) => !g.deletedAt && g.subjectId === id && Number.isFinite(Number(g.grade)))
+    const activities = (state.gradeActivities || [])
+      .filter((activity) => !activity.deletedAt && activity.subjectId === id
+        && activity.status === 'graded' && activity.date
+        && Number.isFinite(Number(activity.earnedPoints)))
       .sort((a, b) => String(a.date).localeCompare(String(b.date)));
-    if (!points.length) continue;
-    const running = [];
-    const acc = [];
-    for (const g of points) {
-      acc.push(g);
-      running.push({
-        date: g.date,
-        grade: Number(g.grade),
-        weight: Number(g.weight) || 1,
-        mean: weightedMean(acc),
-      });
-    }
+    if (!activities.length) continue;
+    let total = 0;
+    const running = activities.map((activity) => {
+      total += Number(activity.earnedPoints);
+      return {
+        date: activity.date,
+        grade: Number(activity.earnedPoints),
+        maxPoints: Number(activity.maxPoints),
+        mean: Math.round((total + Number.EPSILON) * 100) / 100,
+      };
+    });
     out.push({
       courseId: id,
       name: c.name,
       color: c.color || null,
       points: running,
-      latest: running[running.length - 1].mean,
+      latest: total,
       first: running[0].mean,
       n: running.length,
     });
@@ -128,7 +114,8 @@ export function pearson(xs, ys) {
   return num / Math.sqrt(dx * dy);
 }
 
-/** Study time in the 21 days before each grade, paired with that grade.
+/** Study time in the 21 days before each graded activity, paired with the
+ *  points earned for that activity.
  *
  *  The window matters and is a real modelling choice: total study time over a
  *  whole course correlates with nothing useful, because a course you study a
@@ -141,14 +128,21 @@ export function studyVsGrades(state, windowDays = 21) {
     .map((s) => ({ iso: toLocalISO(new Date(s.startedAt)), subjectId: s.subjectId, minutes: Number(s.durationMinutes) || 0 }));
 
   const pairs = [];
-  for (const g of state.grades || []) {
-    if (g.deletedAt || !g.date || !Number.isFinite(Number(g.grade))) continue;
-    const from = addDays(g.date, -windowDays);
+  for (const activity of state.gradeActivities || []) {
+    if (activity.deletedAt || activity.status !== 'graded' || !activity.date
+      || !Number.isFinite(Number(activity.earnedPoints))) continue;
+    const from = addDays(activity.date, -windowDays);
     let minutes = 0;
     for (const s of sessions) {
-      if (s.subjectId === g.subjectId && s.iso >= from && s.iso <= g.date) minutes += s.minutes;
+      if (s.subjectId === activity.subjectId && s.iso >= from && s.iso <= activity.date) minutes += s.minutes;
     }
-    pairs.push({ subjectId: g.subjectId, date: g.date, grade: Number(g.grade), minutes });
+    pairs.push({
+      subjectId: activity.subjectId,
+      date: activity.date,
+      grade: Number(activity.earnedPoints),
+      maxPoints: Number(activity.maxPoints),
+      minutes,
+    });
   }
 
   // Grades from different courses are on different scales in the same units

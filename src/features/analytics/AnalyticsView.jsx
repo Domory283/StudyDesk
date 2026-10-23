@@ -95,7 +95,7 @@ function GradeTrend({ series, locale, t }) {
     <section className="an-card">
       <div className="an-head">
         <h3 className="an-title">{t('an.gradeTrend')}</h3>
-        <div className="an-sub">{t('an.gradeTrendSub')}</div>
+        <div className="an-sub">{t('an.pointsTrendSub')}</div>
       </div>
 
       <div className="an-legend">
@@ -109,7 +109,7 @@ function GradeTrend({ series, locale, t }) {
           >
             <span className="an-key-pip" style={{ background: s.color || 'var(--muted2)' }} />
             {s.name}
-            <span className="an-key-n">{t('an.nGrades', { n: s.n })}</span>
+            <span className="an-key-n">{t('an.nActivities', { n: s.n })}</span>
           </button>
         ))}
       </div>
@@ -120,7 +120,7 @@ function GradeTrend({ series, locale, t }) {
             {ticks.map((v, i) => (
               <g key={i}>
                 <line x1={PAD_L} x2={w - PAD_R} y1={y(v)} y2={y(v)} className="an-grid" />
-                <text x={PAD_L - 6} y={y(v) + 3} className="an-axis" textAnchor="end">{v.toFixed(1)}</text>
+                <text x={PAD_L - 6} y={y(v) + 3} className="an-axis" textAnchor="end">{Math.round(v)}</text>
               </g>
             ))}
             {visible.map((s) => {
@@ -133,7 +133,7 @@ function GradeTrend({ series, locale, t }) {
                   {s.points.length > 1 && <path d={d} fill="none" stroke={stroke} strokeWidth="1.75" strokeLinejoin="round" strokeLinecap="round" />}
                   {s.points.map((p, i) => (
                     <circle key={i} cx={x(p.date)} cy={y(p.mean)} r="2.6" fill={stroke}>
-                      <title>{`${s.name} · ${parseLocalDate(p.date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })} · ${t('an.gradeWas', { grade: p.grade })} · ${t('an.meanNow', { mean: p.mean.toFixed(2) })}`}</title>
+                      <title>{`${s.name} · ${parseLocalDate(p.date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })} · ${t('an.activityScore', { score: `${p.grade}/${p.maxPoints}` })} · ${t('an.cumulativePoints', { points: `${p.mean.toFixed(2)}/500` })}`}</title>
                     </circle>
                   ))}
                 </g>
@@ -210,8 +210,8 @@ function Correlation({ data, t }) {
   return (
     <section className="an-card">
       <div className="an-head">
-        <h3 className="an-title">{t('an.correlation')}</h3>
-        <div className="an-sub">{t('an.correlationSub', { days: data.windowDays })}</div>
+        <h3 className="an-title">{t('an.pointsCorrelation')}</h3>
+        <div className="an-sub">{t('an.pointsCorrelationSub', { days: data.windowDays })}</div>
       </div>
       {data.perSubject.length === 0 && <div className="an-empty">{t('an.noPairs')}</div>}
       {data.perSubject.map((s) => {

@@ -33,6 +33,11 @@ function nowISO() { return stampNow(); }
 // v1.18.1 (StudyDesk#151): the LOCAL calendar date. toISOString() gave the UTC
 // one: yesterday in Auckland before noon, tomorrow in New York after 20:00.
 function todayISO() { return toLocalISO(new Date()); }
+function missingTable(error) {
+  if (!error) return false;
+  return ['42P01', 'PGRST205'].includes(error.code || '')
+    || /does not exist/i.test(error.message || '');
+}
 
 // ── retention (v1.12 Item 0) ─────────────────────────────────────────────────
 
@@ -213,6 +218,11 @@ export async function deleteSubject(id) {
     .update({ deleted_at: stamp, updated_at: stamp })
     .eq('subject_id', id);
   if (gErr) throw gErr;
+  const { error: activityErr } = await supabase
+    .from('grade_activities')
+    .update({ deleted_at: stamp, updated_at: stamp })
+    .eq('subject_id', id);
+  if (activityErr && !missingTable(activityErr)) throw activityErr;
   // v1.7 — assignments and exams cascade too, matching the local reducer, which
   // drops both when a course is deleted. study_actions deliberately do NOT:
   // locally they survive with a dangling courseId, and silently destroying a
@@ -256,6 +266,38 @@ export async function deleteGrade(id) {
     .update({ deleted_at: stamp, updated_at: stamp })
     .eq('id', id);
   if (error) throw error;
+}
+
+export async function upsertGradeActivity({
+  id, subjectId, cut, title, earnedPoints, maxPoints, status, date,
+  allowOverCapacity, updatedAt,
+}) {
+  if (!subjectId) throw new Error('subjectId is required (activity must reference a subject)');
+  const userId = await currentUserId();
+  const { error } = await supabase.from('grade_activities').upsert({
+    id,
+    user_id: userId,
+    subject_id: subjectId,
+    academic_cut: cut,
+    title: String(title || '').trim(),
+    earned_points: status === 'graded' ? earnedPoints : null,
+    max_points: maxPoints,
+    status,
+    date: date ?? todayISO(),
+    allow_over_capacity: Boolean(allowOverCapacity),
+    updated_at: pushStamp(updatedAt),
+  });
+  if (error) throw error;
+  return id;
+}
+
+export async function deleteGradeActivity(id) {
+  const stamp = nowISO();
+  const { error } = await supabase
+    .from('grade_activities')
+    .update({ deleted_at: stamp, updated_at: stamp })
+    .eq('id', id);
+  if (error && !missingTable(error)) throw error;
 }
 
 // ── study sessions ───────────────────────────────────────────────────────────
@@ -965,12 +1007,13 @@ export async function pullAllStudyData() {
   // `selectAll` pages each table to completion or fails as a whole — it never
   // hands back a partial list, so the throws below still mean what they meant.
   const [
-    subjectsRes, gradesRes, sessionsRes, assignmentsRes, examsRes, actionsRes,
+    subjectsRes, gradesRes, gradeActivitiesRes, sessionsRes, assignmentsRes, examsRes, actionsRes,
     plannedRes, termsRes, timetableRes, attachmentsRes, commitmentsRes,
     notesRes, noteAttRes, attendanceRes,
   ] = await Promise.all([
     selectAll(supabase, 'subjects'),
     selectAll(supabase, 'grades'),
+    selectAll(supabase, 'grade_activities'),
     selectAll(supabase, 'study_sessions'),
     selectAll(supabase, 'assignments'),
     selectAll(supabase, 'exams'),
@@ -986,6 +1029,7 @@ export async function pullAllStudyData() {
   ]);
   if (subjectsRes.error) throw subjectsRes.error;
   if (gradesRes.error) throw gradesRes.error;
+  if (gradeActivitiesRes.error && !missingTable(gradeActivitiesRes.error)) throw gradeActivitiesRes.error;
   if (sessionsRes.error) throw sessionsRes.error;
   if (assignmentsRes.error) throw assignmentsRes.error;
   if (examsRes.error) throw examsRes.error;
@@ -1006,18 +1050,14 @@ export async function pullAllStudyData() {
   // the user has not seen. `42P01` is Postgres for undefined_table; PostgREST
   // surfaces it as PGRST205 when its schema cache has not been reloaded.
   // Anything else is a real failure and still throws.
-  const missingTable = (res) => {
-    if (!res.error) return false;
-    const code = res.error.code || '';
-    return code === '42P01' || code === 'PGRST205' || /does not exist/i.test(res.error.message || '');
-  };
-  if (notesRes.error && !missingTable(notesRes)) throw notesRes.error;
-  if (noteAttRes.error && !missingTable(noteAttRes)) throw noteAttRes.error;
+  if (notesRes.error && !missingTable(notesRes.error)) throw notesRes.error;
+  if (noteAttRes.error && !missingTable(noteAttRes.error)) throw noteAttRes.error;
   // Same tolerance, same window, same reasoning as the notebook tables above.
-  if (attendanceRes.error && !missingTable(attendanceRes)) throw attendanceRes.error;
+  if (attendanceRes.error && !missingTable(attendanceRes.error)) throw attendanceRes.error;
   const remote = {
     subjects: subjectsRes.data || [],
     grades: gradesRes.data || [],
+    gradeActivities: gradeActivitiesRes.data || [],
     sessions: sessionsRes.data || [],
     assignments: assignmentsRes.data || [],
     exams: examsRes.data || [],
@@ -1066,7 +1106,7 @@ export const REALTIME_TABLES = [
   // extra subscription each, not three extra round-trips.
   // v1.10 — planned sessions, terms, timetable and attachments join the same
   // debounced pull. Ten subscriptions, still one round-trip per burst.
-  'subjects', 'grades', 'study_sessions', 'assignments', 'exams', 'study_actions',
+  'subjects', 'grades', 'grade_activities', 'study_sessions', 'assignments', 'exams', 'study_actions',
   'planned_sessions', 'academic_terms', 'timetable_entries', 'assignment_attachments',
   'commitments',
   // v1.13 review. These three shipped without a subscription, so notes and

@@ -24,6 +24,7 @@ export function usePersistState(state) {
       actions:state.actions,
       exams:state.exams,
       grades:state.grades,
+      gradeActivities:state.gradeActivities,
       studySessions:state.studySessions,
       plannedSessions:state.plannedSessions,
       academicTerms:state.academicTerms,
@@ -33,8 +34,9 @@ export function usePersistState(state) {
       notes:state.notes,
       noteAttachments:state.noteAttachments,
       attendance:state.attendance,
+      pointsPassMark:state.pointsPassMark,
     }, { critical: true });
-  }, [state.courses,state.assignments,state.actions,state.exams,state.grades,state.studySessions,state.plannedSessions,state.academicTerms,state.timetableEntries,state.attachments,state.commitments,state.notes,state.noteAttachments,state.attendance]);
+  }, [state.courses,state.assignments,state.actions,state.exams,state.grades,state.gradeActivities,state.studySessions,state.plannedSessions,state.academicTerms,state.timetableEntries,state.attachments,state.commitments,state.notes,state.noteAttachments,state.attendance,state.pointsPassMark]);
   // gradeMode is UI-only — persist separately so it doesn't trigger a v1 rewrite on every toggle.
   useEffect(() => {
     try { localStorage.setItem("studydesk-grade-mode", state.gradeMode); } catch {}
