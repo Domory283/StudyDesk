@@ -725,7 +725,12 @@
       "prepareFor": "Vorbereiten: {{label}}",
       "topicMore": " (+{{n}} mehr)",
       "editExam": "Prüfung bearbeiten",
-      "examDate": "Prüfungsdatum"
+      "examDate": "Prüfungsdatum",
+      "examToday": "Prüfung heute",
+      "examTomorrow": "Prüfung morgen",
+      "examInDays": "Prüfung in {{n}} Tagen",
+      "startStudyingNow": "Fang an, für {{label}} zu lernen ({{difficulty}}), {{when}}",
+      "startStudyingOn": "Fang am {{date}} an, für {{label}} zu lernen ({{difficulty}})"
     },
     "md": {
       "addAssignment": "Aufgabe hinzufügen",

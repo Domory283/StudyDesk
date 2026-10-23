@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { setLanguage, SUPPORTED_LANGS, LANGUAGE_NAMES } from "../../i18n/index.js";
 import { useScrollSelectedIntoView } from "../../lib/useScrollSelectedIntoView.js";
-import { daysUntil } from "../../lib/deadlines.js";
+import { daysUntil, examStudyPlan } from "../../lib/deadlines.js";
+import { fmtDate } from "../../lib/dates.js";
 import { enterSubmit } from "../../lib/imeSubmit.js";
 import FirstSteps from "../onboarding/FirstSteps.jsx";
 import { fmtTime } from "../../lib/dates.js";
@@ -43,13 +44,20 @@ export default function ActionsView({ state, dispatch, showFlash, onAddCourse, o
       actions.push({id:"sugg-a-"+a.id,text:(c?c.name+": ":"")+a.title,bucket,sourceId:a.id,sourceType:"assignment",suggested:true,courseId:a.courseId||null,done:false});
     });
     // Only surface exams that are incomplete and not past their date
-    state.exams.filter(e=>!e.done&&e.dueDate&&daysUntil(e.dueDate)>-1).sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate)).slice(0,3).forEach(e=>{
-      const d=daysUntil(e.dueDate); const c=state.courses[e.courseId];
+    // v1.19 (#154) — ordered by when to START studying, and saying so: with
+    // exams close together, the exam day alone did not say which one to open.
+    examStudyPlan(state.exams).forEach(({exam:e,start,startIn,dueIn,bucket})=>{
+      const c=state.courses[e.courseId];
       const incompTopics=(e.topics||[]).filter(t=>!t.done);
-      const bucket=d<=3?"today":d<=7?"this_week":"later";
       const exLabel=(c?c.name+": ":"")+e.title;
-      if(incompTopics.length>0){actions.push({id:"sugg-e-"+e.id,text:t('av.ec.studyFor',{label:exLabel})+" — "+incompTopics[0].title+(incompTopics.length>1?t('av.ec.topicMore',{n:incompTopics.length-1}):""),bucket,sourceId:e.id,sourceType:"exam",suggested:true,courseId:e.courseId||null,done:false});}
-      else{actions.push({id:"sugg-e-"+e.id,text:t('av.ec.prepareFor',{label:exLabel}),bucket,sourceId:e.id,sourceType:"exam",suggested:true,courseId:e.courseId||null,done:false});}
+      const when=dueIn===0?t('av.ec.examToday'):dueIn===1?t('av.ec.examTomorrow'):t('av.ec.examInDays',{n:dueIn});
+      const difficulty=t(`av.difficulty.${e.difficulty||"medium"}`);
+      const text=startIn>0
+        ? t('av.ec.startStudyingOn',{label:exLabel,date:fmtDate(start),difficulty})
+        : incompTopics.length>0
+          ? t('av.ec.studyFor',{label:exLabel})+" — "+incompTopics[0].title+(incompTopics.length>1?t('av.ec.topicMore',{n:incompTopics.length-1}):"")+" · "+when
+          : t('av.ec.startStudyingNow',{label:exLabel,difficulty,when});
+      actions.push({id:"sugg-e-"+e.id,text,bucket,sourceId:e.id,sourceType:"exam",suggested:true,courseId:e.courseId||null,done:false});
     });
     return actions;
   })();

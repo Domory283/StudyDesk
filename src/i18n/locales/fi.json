@@ -725,7 +725,12 @@
       "prepareFor": "Valmistaudu: {{label}}",
       "topicMore": " (+{{n}} lisää)",
       "editExam": "Muokkaa koetta",
-      "examDate": "Kokeen päivä"
+      "examDate": "Kokeen päivä",
+      "examToday": "koe tänään",
+      "examTomorrow": "koe huomenna",
+      "examInDays": "koe {{n}} päivän päästä",
+      "startStudyingNow": "Aloita opiskelu: {{label}} ({{difficulty}}), {{when}}",
+      "startStudyingOn": "Aloita opiskelu {{date}}: {{label}} ({{difficulty}})"
     },
     "md": {
       "addAssignment": "Lisää tehtävä",

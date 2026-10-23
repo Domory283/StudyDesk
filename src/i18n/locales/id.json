@@ -718,7 +718,12 @@
       "prepareFor": "Persiapan untuk {{label}}",
       "topicMore": " (+{{n}} lagi)",
       "editExam": "Edit ujian",
-      "examDate": "Tanggal ujian"
+      "examDate": "Tanggal ujian",
+      "examToday": "ujian hari ini",
+      "examTomorrow": "ujian besok",
+      "examInDays": "ujian {{n}} hari lagi",
+      "startStudyingNow": "Mulai belajar untuk {{label}} ({{difficulty}}), {{when}}",
+      "startStudyingOn": "Mulai belajar untuk {{label}} pada {{date}} ({{difficulty}})"
     },
     "md": {
       "addAssignment": "Tambah tugas",

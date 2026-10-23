@@ -732,7 +732,12 @@
       "prepareFor": "Préparer : {{label}}",
       "topicMore": " (+{{n}} de plus)",
       "editExam": "Modifier l'examen",
-      "examDate": "Date de l'examen"
+      "examDate": "Date de l'examen",
+      "examToday": "examen aujourd'hui",
+      "examTomorrow": "examen demain",
+      "examInDays": "examen dans {{n}} jours",
+      "startStudyingNow": "Commence à réviser {{label}} ({{difficulty}}), {{when}}",
+      "startStudyingOn": "Commence à réviser {{label}} le {{date}} ({{difficulty}})"
     },
     "md": {
       "addAssignment": "Ajouter un devoir",
