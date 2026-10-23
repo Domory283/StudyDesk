@@ -1149,7 +1149,13 @@
       "network": "Diese Adresse war nicht erreichbar."
     },
     "repeatingNote_one": "{{count}} wiederkehrender Termin als einzelnes Datum importiert",
-    "repeatingNote_other": "{{count}} wiederkehrende Termine als je ein einzelnes Datum importiert"
+    "repeatingNote_other": "{{count}} wiederkehrende Termine als je ein einzelnes Datum importiert",
+    "mapCourses": "Kurse",
+    "mapTitle": "Kurse zuordnen",
+    "mapHelp": "Jeder Kurs aus diesem Kalender kann einem deiner StudyDesk-Kurse zugeordnet werden. Einträge aus einem Kurs ohne Zuordnung bleiben, wo sie sind.",
+    "mapSource": "{{label}} ({{n}})",
+    "notMapped": "Nicht zugeordnet",
+    "mapSaved": "Kurse gespeichert · {{n}} verschoben"
   },
   "att": {
     "tab": "Anwesenheit",

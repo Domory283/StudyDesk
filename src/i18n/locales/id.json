@@ -1140,7 +1140,13 @@
       "network": "Tidak dapat menghubungi alamat itu."
     },
     "repeatingNote_one": "{{count}} acara berulang diimpor sebagai satu tanggal",
-    "repeatingNote_other": "{{count}} acara berulang diimpor sebagai satu tanggal masing-masing"
+    "repeatingNote_other": "{{count}} acara berulang diimpor sebagai satu tanggal masing-masing",
+    "mapCourses": "Kursus",
+    "mapTitle": "Cocokkan kursus",
+    "mapHelp": "Setiap kursus di kalender ini bisa dipasangkan ke salah satu kursus StudyDesk-mu. Item dari kursus yang tidak dipasangkan tetap di tempatnya.",
+    "mapSource": "{{label}} ({{n}})",
+    "notMapped": "Tidak dipasangkan",
+    "mapSaved": "Kursus disimpan · {{n}} dipindahkan"
   },
   "att": {
     "tab": "Kehadiran",

@@ -1145,7 +1145,13 @@
       "network": "无法连接该地址。"
     },
     "repeatingNote_one": "{{count}} 个重复事件仅导入为单个日期",
-    "repeatingNote_other": "{{count}} 个重复事件各仅导入为单个日期"
+    "repeatingNote_other": "{{count}} 个重复事件各仅导入为单个日期",
+    "mapCourses": "课程",
+    "mapTitle": "匹配课程",
+    "mapHelp": "此日历中的每门课程都可以对应到你的一门 StudyDesk 课程。未对应课程的项目保持原样。",
+    "mapSource": "{{label}}（{{n}}）",
+    "notMapped": "未对应",
+    "mapSaved": "课程已保存 · 移动了 {{n}} 项"
   },
   "att": {
     "tab": "出勤",
