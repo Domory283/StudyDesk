@@ -1176,5 +1176,15 @@
     "versions": "从 {{current}} 更新到 {{latest}}",
     "open": "前往 F-Droid 获取",
     "later": "稍后"
+  },
+  "dtp": {
+    "date": "日期",
+    "time": "时间",
+    "prevMonth": "上个月",
+    "nextMonth": "下个月",
+    "hour": "时",
+    "minute": "分",
+    "clear": "清除",
+    "set": "确定"
   }
 }

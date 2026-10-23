@@ -34,6 +34,7 @@ import { IS_DESKTOP } from '../../lib/desktop.js';
 import { checkForDesktopUpdate, runDesktopUpdateAction, useDesktopUpdate } from '../../lib/desktopUpdate.js';
 import { setUpdateCheckEnabled, useFdroidUpdate } from '../../lib/fdroidUpdate.js';
 import { feedbackStatus, SHOW_FEEDBACK_STATUS } from '../../lib/feedbackStatus.js';
+import DateInput from '../../lib/DateInput.jsx';
 
 // Product names, the same in every language.
 const APP_NAMES = { ncc: 'NCC', limelog: 'LimeLog', studydesk: 'StudyDesk' };
@@ -1091,7 +1092,7 @@ export default function SettingsView({ state, dispatch, showFlash, session }) {
                 </button>
               </span>
               {state.studyUntil !== null && (
-                <input
+                <DateInput
                   type="time"
                   className="sv2-time"
                   aria-label={t('settings.studyUntil')}

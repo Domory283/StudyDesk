@@ -1180,5 +1180,15 @@
     "versions": "Päivitä versiosta {{current}} versioon {{latest}}",
     "open": "Hae F-Droidista",
     "later": "Myöhemmin"
+  },
+  "dtp": {
+    "date": "Päivämäärä",
+    "time": "Kellonaika",
+    "prevMonth": "Edellinen kuukausi",
+    "nextMonth": "Seuraava kuukausi",
+    "hour": "Tunti",
+    "minute": "Minuutti",
+    "clear": "Tyhjennä",
+    "set": "Valitse"
   }
 }

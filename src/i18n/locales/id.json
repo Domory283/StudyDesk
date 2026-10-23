@@ -1171,5 +1171,15 @@
     "versions": "Perbarui dari {{current}} ke {{latest}}",
     "open": "Dapatkan di F-Droid",
     "later": "Nanti"
+  },
+  "dtp": {
+    "date": "Tanggal",
+    "time": "Waktu",
+    "prevMonth": "Bulan sebelumnya",
+    "nextMonth": "Bulan berikutnya",
+    "hour": "Jam",
+    "minute": "Menit",
+    "clear": "Hapus",
+    "set": "Atur"
   }
 }
