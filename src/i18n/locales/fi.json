@@ -1215,5 +1215,22 @@
     "runLabel": "Lasketaan lohkoon: {{title}}",
     "endRun": "Lopeta laskeminen tähän lohkoon",
     "todayBlocks": "Tämän päivän opiskelulohkot"
+  },
+  "done": {
+    "title": "Tehdyt",
+    "open": "Tehdyt ({{count}})",
+    "today": "Tänään",
+    "yesterday": "Eilen",
+    "earlier": "Aiemmin",
+    "empty": "Mitään ei ole vielä merkitty tehdyksi.",
+    "restored": "Palautettu listaasi",
+    "untick": "Poista merkintä: {{title}}",
+    "kind": {
+      "action": "Tehtävä",
+      "assignment": "Palautus",
+      "exam": "Koe"
+    },
+    "markedDone": "Tehty: {{title}}",
+    "undo": "Kumoa"
   }
 }

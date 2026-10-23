@@ -1215,5 +1215,22 @@
     "runLabel": "Counts toward: {{title}}",
     "endRun": "Stop counting toward this block",
     "todayBlocks": "Study blocks today"
+  },
+  "done": {
+    "title": "Done",
+    "open": "Done ({{count}})",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "earlier": "Earlier",
+    "empty": "Nothing ticked off yet.",
+    "restored": "Back in your list",
+    "untick": "Untick: {{title}}",
+    "kind": {
+      "action": "Task",
+      "assignment": "Assignment",
+      "exam": "Exam"
+    },
+    "markedDone": "Done: {{title}}",
+    "undo": "Undo"
   }
 }

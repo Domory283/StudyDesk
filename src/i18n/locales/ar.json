@@ -1267,5 +1267,22 @@
     "runLabel": "يُحتسب لـ: {{title}}",
     "endRun": "إيقاف الاحتساب لهذه الكتلة",
     "todayBlocks": "كتل الدراسة اليوم"
+  },
+  "done": {
+    "title": "المنجز",
+    "open": "المنجز ({{count}})",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "earlier": "سابقًا",
+    "empty": "لم تُنجز أي مهمة بعد.",
+    "restored": "عاد إلى قائمتك",
+    "untick": "إلغاء التحديد: {{title}}",
+    "kind": {
+      "action": "مهمة",
+      "assignment": "واجب",
+      "exam": "اختبار"
+    },
+    "markedDone": "تم: {{title}}",
+    "undo": "تراجع"
   }
 }

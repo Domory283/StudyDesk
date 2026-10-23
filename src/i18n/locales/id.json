@@ -1206,5 +1206,22 @@
     "runLabel": "Dihitung untuk: {{title}}",
     "endRun": "Berhenti menghitung untuk blok ini",
     "todayBlocks": "Blok belajar hari ini"
+  },
+  "done": {
+    "title": "Selesai",
+    "open": "Selesai ({{count}})",
+    "today": "Hari ini",
+    "yesterday": "Kemarin",
+    "earlier": "Sebelumnya",
+    "empty": "Belum ada yang dicentang.",
+    "restored": "Kembali ke daftarmu",
+    "untick": "Hapus centang: {{title}}",
+    "kind": {
+      "action": "Tugas",
+      "assignment": "PR",
+      "exam": "Ujian"
+    },
+    "markedDone": "Selesai: {{title}}",
+    "undo": "Urungkan"
   }
 }

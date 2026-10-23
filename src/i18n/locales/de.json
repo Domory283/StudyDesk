@@ -1215,5 +1215,22 @@
     "runLabel": "Zählt für: {{title}}",
     "endRun": "Nicht mehr für diesen Block zählen",
     "todayBlocks": "Lernblöcke heute"
+  },
+  "done": {
+    "title": "Erledigt",
+    "open": "Erledigt ({{count}})",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "earlier": "Früher",
+    "empty": "Noch nichts abgehakt.",
+    "restored": "Wieder in deiner Liste",
+    "untick": "Haken entfernen: {{title}}",
+    "kind": {
+      "action": "Aufgabe",
+      "assignment": "Hausaufgabe",
+      "exam": "Prüfung"
+    },
+    "markedDone": "Erledigt: {{title}}",
+    "undo": "Rückgängig"
   }
 }

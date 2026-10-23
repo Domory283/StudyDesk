@@ -33,6 +33,7 @@ import SaveSessionSheet from "./features/sessions/SaveSessionSheet.jsx";
 import { pastSessionDraft } from "./lib/pastSession.js";
 import { isOpenPlan, nextPlanStartAt, planSaveSteps, planToOffer } from "./lib/planRun.js";
 import { timerPlanId } from "./lib/timerSnapshot.js";
+import { onUndoOffer, UNDO_MS } from "./lib/doneList.js";
 import "./styles/notebook.css";
 import CoursePicker from "./lib/CoursePicker.jsx";
 import { AddAsgnModal, AddExamModal, EditCourseModal } from "./features/plan/CourseModals.jsx";
@@ -212,6 +213,15 @@ export default function App() {
   }, []);
 
   const [flash, setFlash] = useState(null);
+  // v1.19 (#87) — "Marked done · Undo" for a few seconds after any tick, so a
+  // misclick never needs the Done list. See lib/doneList.js.
+  const [undoOffer, setUndoOffer] = useState(null);
+  useEffect(() => onUndoOffer(setUndoOffer), []);
+  useEffect(() => {
+    if (!undoOffer) return undefined;
+    const id = setTimeout(() => setUndoOffer(null), UNDO_MS);
+    return () => clearTimeout(id);
+  }, [undoOffer]);
   const [showAddCourse, setShowAddCourse] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [showAddAsgn, setShowAddAsgn] = useState(false);
@@ -1107,6 +1117,12 @@ export default function App() {
       />
     )}
     {flash&&<div className="flash">{flash}</div>}
+    {undoOffer&&(
+      <div className="undo-bar" role="status" key={undoOffer.key}>
+        <span className="undo-bar-text">{t('done.markedDone', { title: undoOffer.title })}</span>
+        <button type="button" onClick={()=>{ dispatch(undoOffer.undo); setUndoOffer(null); }}>{t('done.undo')}</button>
+      </div>
+    )}
     {accountNotice&&(
       <div className="flash flash--notice" role="status">
         <span>{accountNotice}</span>

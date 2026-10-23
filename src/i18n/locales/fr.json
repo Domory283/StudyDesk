@@ -1224,5 +1224,22 @@
     "runLabel": "Compte pour : {{title}}",
     "endRun": "Ne plus compter pour ce bloc",
     "todayBlocks": "Blocs d'étude du jour"
+  },
+  "done": {
+    "title": "Terminé",
+    "open": "Terminé ({{count}})",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "earlier": "Plus tôt",
+    "empty": "Rien de coché pour l'instant.",
+    "restored": "De retour dans ta liste",
+    "untick": "Décocher : {{title}}",
+    "kind": {
+      "action": "Tâche",
+      "assignment": "Devoir",
+      "exam": "Examen"
+    },
+    "markedDone": "Terminé : {{title}}",
+    "undo": "Annuler"
   }
 }

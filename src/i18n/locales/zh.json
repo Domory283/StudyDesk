@@ -1211,5 +1211,22 @@
     "runLabel": "计入：{{title}}",
     "endRun": "不再计入此时段",
     "todayBlocks": "今天的学习时段"
+  },
+  "done": {
+    "title": "已完成",
+    "open": "已完成（{{count}}）",
+    "today": "今天",
+    "yesterday": "昨天",
+    "earlier": "更早",
+    "empty": "还没有勾选任何项目。",
+    "restored": "已放回你的列表",
+    "untick": "取消勾选：{{title}}",
+    "kind": {
+      "action": "任务",
+      "assignment": "作业",
+      "exam": "考试"
+    },
+    "markedDone": "已完成：{{title}}",
+    "undo": "撤销"
   }
 }
