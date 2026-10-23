@@ -48,7 +48,9 @@ export default function ExamCard({ exam, courses, dispatch }) {
   const pct=topics.length>0?Math.round((doneCnt/topics.length)*100):0;
   const progressColor=pct===100?"var(--success)":pct>50?"var(--warning)":"var(--danger)";
   const addTopic=()=>{ if(!topicInput.trim()) return; dispatch({type:"ADD_EXAM_TOPIC",examId:exam.id,title:topicInput.trim()}); setTopicInput(""); };
-  if (editing) return <div className="exam-card" style={{borderInlineStartColor:course?.color||"var(--border2)",flexDirection:"column",gap:10,padding:14}}>
+  // v1.19 — `display:flex`: without it the gap below did nothing and the
+  // fields sat flush against each other and the buttons.
+  if (editing) return <div className="exam-card" style={{borderInlineStartColor:course?.color||"var(--border2)",display:"flex",flexDirection:"column",gap:12,padding:14}}>
     <input type="text" value={eTitle} onChange={e=>setETitle(e.target.value)} style={{fontWeight:500}} autoFocus aria-label={t('av.md.examSubject')}/>
     <DateInput type="date" value={eDate} onChange={e=>setEDate(e.target.value)} aria-label={t('av.ec.examDate')}/>
     <div className="study-plan-bar">
@@ -60,7 +62,7 @@ export default function ExamCard({ exam, courses, dispatch }) {
       ))}
     </div>
     <textarea value={eNotes} onChange={e=>setENotes(e.target.value)} placeholder={t('sv.fNotes')+"…"} style={{minHeight:48,fontSize:12}}/>
-    <div style={{display:"flex",gap:8}}>
+    <div style={{display:"flex",gap:8,marginTop:4}}>
       <button className="btn btn-sm" onClick={saveEdit}>{t('common.save')}</button>
       <button className="btn-outline btn-sm" onClick={()=>setEditing(false)}>{t('common.cancel')}</button>
     </div>
