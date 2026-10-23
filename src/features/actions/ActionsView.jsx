@@ -140,7 +140,7 @@ export default function ActionsView({ state, dispatch, showFlash, onAddCourse, o
       <div className="bucket-header"><div className="bucket-dot" style={{background:BUCKET_COLORS.today.bg}}/>{t('pr.todayBlocks')}</div>
       {todayPlans.map(p=>{
         const c=p.subjectId?state.courses[p.subjectId]:null;
-        return <div key={p.id} className="action-item">
+        return <div key={p.id} className="action-item" style={{alignItems:"center"}}>
           <span aria-hidden="true" style={{width:8,height:8,borderRadius:"50%",flexShrink:0,background:c?.color||"var(--border2)"}}/>
           <div className="action-text">
             <span style={{fontFamily:"var(--font-mono)",fontSize:12,color:"var(--muted)",marginInlineEnd:8}}>{fmtTime(p.startsAt)}</span>
