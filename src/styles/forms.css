@@ -189,3 +189,24 @@ input[type=text],input[type=password],input[type=date],input[type=time],input[ty
   .input-row{flex-direction:column;align-items:stretch;}
   .btn,.btn-outline{text-align:center;}
 }
+/* v1.19 (#185) — a scheduled block's start sheet (features/timer/PlanStartSheet).
+   A whole page, not a modal: this is a moment, the start of a block, and the
+   one decision on it is "start now?". The subject's colour runs across the top
+   as a band that draws in from the left; everything else is the paper page. */
+.pss{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px 20px calc(24px + env(safe-area-inset-bottom));animation:fadeOverlay 200ms var(--ease-paper);}
+.pss-close{position:absolute;top:calc(14px + env(safe-area-inset-top));inset-inline-end:14px;width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.pss-body{width:100%;max-width:420px;animation:pssRise 420ms var(--ease-settle) both;}
+.pss-band{height:6px;border-radius:3px;background:var(--pss-colour);transform-origin:left center;animation:pssBand 560ms var(--ease-settle) 80ms both;margin-bottom:28px;}
+[dir="rtl"] .pss-band{transform-origin:right center;}
+.pss-kicker{font-family:var(--font-mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.pss-title{font-family:var(--font-display);font-weight:400;font-size:34px;line-height:1.15;margin:0 0 14px;color:var(--text);overflow-wrap:anywhere;}
+.pss-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.pss-duration{font-family:var(--font-mono);font-size:12px;color:var(--muted);}
+.pss-notes{font-size:14px;color:var(--muted);margin:0 0 8px;}
+.pss-actions{margin-top:32px;display:flex;flex-direction:column;gap:10px;}
+.pss-start{width:100%;padding:16px 18px;font-size:13px;}
+.pss-secondary{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pss-secondary .btn-outline{padding:12px 14px;}
+@keyframes pssRise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
+@keyframes pssBand{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+@media (prefers-reduced-motion: reduce){.pss-body,.pss-band{animation:none;}.pss{animation:fadeOverlay 200ms linear;}}

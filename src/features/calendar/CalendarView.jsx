@@ -940,7 +940,7 @@ function DayAgenda({ iso, byDay, lessons, commitments, locale, onOpen, onClose, 
 // someone drags by accident and hits Escape — and an accidental drag is the
 // most likely gesture on a surface where dragging is also how you move things.
 
-function PlanEditor({ draft, courses, onSave, onDelete, onDeleteSeries, onLog, onDismiss, onClose, t }) {
+function PlanEditor({ draft, courses, onSave, onDelete, onDeleteSeries, onLog, onDismiss, onStart, onClose, t }) {
   const isNew = !draft.id;
   const [subjectId, setSubjectId] = useState(draft.subjectId || '');
   const [title, setTitle] = useState(draft.title || '');
@@ -1058,6 +1058,13 @@ function PlanEditor({ draft, courses, onSave, onDelete, onDeleteSeries, onLog, o
                 anywhere in the suite — the plan row itself is never counted as
                 study, here or in NCC. */}
             <div className="plan-actions">
+              {/* v1.19 (#185) — run this block in the timer. Its rounds make
+                  the block's one session, so Start and Log are two ways to
+                  the same single row, and a kept block offers neither: Log
+                  on a kept block is how the duplicate session used to get in. */}
+              {onStart && draft.status !== 'kept' && draft.status !== 'dismissed' && (
+                <button className="btn btn-sm" onClick={onStart}>{t('pr.start')}</button>
+              )}
               {draft.status !== 'kept' && (
                 <button className="btn-outline btn-sm" onClick={onLog}>{t('cal.planLogIt')}</button>
               )}
@@ -1247,7 +1254,7 @@ function CommitmentEditor({ draft, onSave, onDelete, onClose, t }) {
 
 // ── View ───────────────────────────────────────────────────────────────────
 
-export default function CalendarView({ state, dispatch, session, showFlash, tier, onOpenItem, onAddAsgn, onAddExam }) {
+export default function CalendarView({ state, dispatch, session, showFlash, tier, onOpenItem, onAddAsgn, onAddExam, onStartPlan }) {
   const { t } = useTranslation();
   const locale = formatLocale();
   const weekStart = useMemo(() => resolveWeekStart(locale), [locale]);
@@ -1801,6 +1808,7 @@ export default function CalendarView({ state, dispatch, session, showFlash, tier
           onDeleteSeries={deletePlanSeries}
           onLog={logPlan}
           onDismiss={dismissPlan}
+          onStart={onStartPlan ? () => { const id = plan.id; setPlan(null); onStartPlan(id); } : null}
           onClose={() => setPlan(null)}
           t={t}
         />

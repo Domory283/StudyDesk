@@ -1199,5 +1199,18 @@
     "minute": "Minute",
     "clear": "Effacer",
     "set": "Valider"
+  },
+  "pr": {
+    "start": "Démarrer",
+    "startFocus": "Démarrer la concentration",
+    "snooze": "Rappel dans 5 min",
+    "skip": "Passer",
+    "notNow": "Pas maintenant",
+    "startsNow": "Bloc d'étude · maintenant",
+    "scheduledFor": "Bloc d'étude · {{time}}",
+    "minutes": "{{n}} min",
+    "runLabel": "Compte pour : {{title}}",
+    "endRun": "Ne plus compter pour ce bloc",
+    "todayBlocks": "Blocs d'étude du jour"
   }
 }
