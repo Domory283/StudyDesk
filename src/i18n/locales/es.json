@@ -264,7 +264,7 @@
     "scaleDirection": "Qué extremo es mejor",
     "scaleHighBest": "Alto",
     "scaleLowBest": "Bajo",
-    "gradeNoteCustom": "Tu propia escala numérica: la media es una media ponderada, igual que en IB. Se guarda solo en este dispositivo y no se sincroniza. El cálculo oficial de tu centro es siempre el que vale.",
+    "gradeNoteCustom": "Tu propia escala numérica: la media es una media ponderada de tus notas, o de las notas de boletín cuando el boletín muestra notas enteras. La escala va con tu cuenta a tus otros dispositivos y a Nexus. El cálculo oficial de tu centro es siempre el que vale.",
     "support": "Apoyo",
     "supportDev": "Apoya el desarrollo",
     "supportDevSub": "Un enlace a Ko-fi. Nada en la app depende de ello.",
@@ -438,7 +438,15 @@
     "otherAccountClearedUnsent_one": "Iniciaste sesión con otra cuenta, así que los datos de la cuenta anterior se eliminaron de este dispositivo, incluido {{count}} cambio sin sincronizar.",
     "otherAccountClearedUnsent_many": "Iniciaste sesión con otra cuenta, así que los datos de la cuenta anterior se eliminaron de este dispositivo, incluidos {{count}} cambios sin sincronizar.",
     "otherAccountClearedUnsent_other": "Iniciaste sesión con otra cuenta, así que los datos de la cuenta anterior se eliminaron de este dispositivo, incluidos {{count}} cambios sin sincronizar.",
-    "otherTabReloaded": "Iniciaste o cerraste sesión en otra pestaña, así que esta pestaña se recargó."
+    "otherTabReloaded": "Iniciaste o cerraste sesión en otra pestaña, así que esta pestaña se recargó.",
+    "scalePresetDe": "Alemania · DIA 0–15 (1–6)",
+    "reportGrades": "Boletín",
+    "reportWhole": "Notas enteras",
+    "reportFine": "Media de puntos",
+    "reportMethod": "Orden",
+    "reportConvertFirst": "Convertir cada nota y luego promediar",
+    "reportAverageFirst": "Promediar puntos y luego convertir",
+    "reportNote": "Con notas enteras, cada asignatura muestra su nota de boletín (p. ej., 2) con la media de puntos debajo, y la media general se calcula con las notas de boletín. Una asignatura justo entre dos notas muestra ambas (1–2): decide el profesor."
   },
   "sdob": {
     "brand": "Deja de decidir. Empieza a estudiar.",
@@ -532,7 +540,11 @@
     "pcErrName": "Pon un nombre a la asignatura.",
     "pcErrCredits": "Los créditos deben ser cero o más.",
     "weightBlocksAria": "Esta nota es el {{pct}} % del curso, una de {{n}} notas ponderadas",
-    "weightBlocksNoneAria": "{{n}} notas ponderadas en este curso"
+    "weightBlocksNoneAria": "{{n}} notas ponderadas en este curso",
+    "reportScale": "Notas de boletín {{best}}–{{worst}} · {{best}} la mejor",
+    "reportProjection": "Una asignatura está entre dos notas de boletín, así que es una proyección",
+    "reportBetween": "Justo entre dos notas: decide el profesor",
+    "fGradeCustom": "Nota ({{min}}–{{max}})"
   },
   "sv": {
     "today": "Hoy",

@@ -260,7 +260,7 @@
     "scaleDirection": "哪一端更好",
     "scaleHighBest": "高",
     "scaleLowBest": "低",
-    "gradeNoteCustom": "你自定义的分数区间 —— 平均分按加权平均计算，与 IB 相同。仅保存在本设备，不会同步。以学校的官方计算方式为准。",
+    "gradeNoteCustom": "你自定义的分数区间 —— 平均分是你各项成绩的加权平均；当成绩单显示整数等级时，则是成绩单等级的加权平均。该区间随你的账户同步到你的其他设备和 Nexus。以学校的官方计算方式为准。",
     "support": "支持",
     "supportDev": "支持开发",
     "supportDevSub": "一个 Ko-fi 链接。应用中没有任何功能因此被锁定。",
@@ -432,7 +432,15 @@
     "fdroidCheckNote": "StudyDesk 每天向 f-droid.org 查询一次最新版本，不会发送任何关于你的信息。关闭后将不再发送该请求。",
     "otherAccountCleared": "你登录了另一个账户，因此上一个账户的数据已从此设备移除。",
     "otherAccountClearedUnsent_other": "你登录了另一个账户，因此上一个账户的数据已从此设备移除，其中包括 {{count}} 项尚未同步的更改。",
-    "otherTabReloaded": "你在另一个标签页中登录或退出了账户，因此此标签页已重新加载。"
+    "otherTabReloaded": "你在另一个标签页中登录或退出了账户，因此此标签页已重新加载。",
+    "scalePresetDe": "德国 · DIA 0–15（1–6）",
+    "reportGrades": "成绩单",
+    "reportWhole": "整数等级",
+    "reportFine": "分数平均",
+    "reportMethod": "顺序",
+    "reportConvertFirst": "先换算每个成绩，再求平均",
+    "reportAverageFirst": "先平均分数，再换算",
+    "reportNote": "使用整数等级时，每门课程显示其成绩单等级（如 2），下方显示分数平均，总平均按成绩单等级计算。恰好介于两个等级之间的课程会同时显示两者（1–2）：由老师决定。"
   },
   "sdob": {
     "brand": "别再纠结，开始学习。",
@@ -524,7 +532,11 @@
     "pcErrName": "请填写课程名称。",
     "pcErrCredits": "学分不能为负。",
     "weightBlocksAria": "该成绩占课程的 {{pct}}%，是 {{n}} 个加权成绩之一",
-    "weightBlocksNoneAria": "本课程有 {{n}} 个加权成绩"
+    "weightBlocksNoneAria": "本课程有 {{n}} 个加权成绩",
+    "reportScale": "成绩单等级 {{best}}–{{worst}} · {{best}} 最好",
+    "reportProjection": "有课程介于两个成绩单等级之间，因此这是预估",
+    "reportBetween": "恰好介于两个等级之间：由老师决定",
+    "fGradeCustom": "成绩（{{min}}–{{max}}）"
   },
   "sv": {
     "today": "今天",
