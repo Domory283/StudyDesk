@@ -36,7 +36,7 @@ import { timerPlanId } from "./lib/timerSnapshot.js";
 import { onUndoOffer, UNDO_MS } from "./lib/doneList.js";
 import "./styles/notebook.css";
 import CoursePicker from "./lib/CoursePicker.jsx";
-import { AddAsgnModal, AddExamModal, EditCourseModal } from "./features/plan/CourseModals.jsx";
+import { AddAsgnModal, EditCourseModal } from "./features/plan/CourseModals.jsx";
 import CourseDetailView from "./features/plan/CourseDetailView.jsx";
 import PlanView from "./features/plan/PlanView.jsx";
 import ActionsView from "./features/actions/ActionsView.jsx";
@@ -88,6 +88,8 @@ const CalendarView = lazy(() => import("./features/calendar/CalendarView.jsx"));
 const AnalyticsView = lazy(() => import("./features/analytics/AnalyticsView.jsx"));
 const TimetableView = lazy(() => import("./features/timetable/TimetableView.jsx"));
 const SettingsView = lazy(() => import("./features/settings/SettingsView.jsx"));
+// v1.19 (#158) — on demand: its repeat brings planRepeat.js and timetable.js.
+const AddExamModal = lazy(() => import("./features/plan/AddExamModal.jsx"));
 // v1.17 (limecore#12): only a first run ever shows onboarding.
 const OnboardingView = lazy(() => import("./features/onboarding/OnboardingView.jsx"));
 
@@ -1071,7 +1073,7 @@ export default function App() {
       <div style={{display:"flex",gap:8}}><button className="btn" onClick={addCourse}>{t('av.chrome.addCourse')}</button><button className="btn-outline" onClick={()=>setShowAddCourse(false)}>{t('common.cancel')}</button></div>
     </div></div>}
     {showAddAsgn&&<AddAsgnModal courses={courses} activeCourse={state.activeCourse} onAdd={(data)=>{dispatch({type:"ADD_ASSIGNMENT",title:data.title,courseId:data.courseId,assignType:data.type,dueDate:data.dueDate,dueTime:data.dueTime,notes:data.notes});setShowAddAsgn(false);showFlash(t('av.flash.assignmentAdded'));}} onClose={()=>setShowAddAsgn(false)}/>}
-    {showAddExam&&<AddExamModal courses={courses} activeCourse={state.activeCourse} terms={state.academicTerms} onAdd={({dates,...data})=>{const ds=dates?.length?dates:[data.dueDate];for(const dueDate of ds)dispatch({type:"ADD_EXAM",...data,dueDate});setShowAddExam(false);showFlash(ds.length>1?t('av.flash.examsAdded',{count:ds.length}):t('av.flash.examAdded'));}} onClose={()=>setShowAddExam(false)}/>}
+    {showAddExam&&<Suspense fallback={null}><AddExamModal courses={courses} activeCourse={state.activeCourse} terms={state.academicTerms} onAdd={({dates,...data})=>{const ds=dates?.length?dates:[data.dueDate];for(const dueDate of ds)dispatch({type:"ADD_EXAM",...data,dueDate});setShowAddExam(false);showFlash(ds.length>1?t('av.flash.examsAdded',{count:ds.length}):t('av.flash.examAdded'));}} onClose={()=>setShowAddExam(false)}/></Suspense>}
     {editingCourse&&<EditCourseModal
       course={state.courses[editingCourse.id] || editingCourse}
       courses={state.courses}
