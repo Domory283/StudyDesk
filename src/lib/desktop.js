@@ -11,6 +11,15 @@ export const desktop =
 /** True only in the Electron desktop build. */
 export const IS_DESKTOP = desktop !== null;
 
+/** Local notebook-image operations, available only through the Electron preload. */
+export const notebookImages = desktop && typeof desktop.importNotebookImage === 'function'
+  ? {
+      import: () => desktop.importNotebookImage(),
+      read: (id) => desktop.readNotebookImage(id),
+      delete: (id) => desktop.deleteNotebookImage(id),
+    }
+  : null;
+
 /** The loopback OAuth callback this launch is listening on, or null — either
  *  because this is not the desktop build, or because no candidate port was
  *  free. A null here means desktop OAuth is unavailable this launch; email

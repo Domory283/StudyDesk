@@ -43,7 +43,10 @@ export default function NoteEditor({
   onChange,
   onInsertPhoto,
   photoUrls,
+  photoErrors,
   onOpenPhoto,
+  onRemovePhoto,
+  onPhotoError,
   autoFocus,
   // Free placement (v1.13 follow-up). When this editor is one box on a page
   // rather than the page itself, the canvas owns the ruled paper and the
@@ -604,7 +607,10 @@ export default function NoteEditor({
                 commit(next);
               }}
               photoUrl={photoUrls?.[b.asset]}
+              photoError={photoErrors?.[b.asset]}
               onOpenPhoto={onOpenPhoto}
+              onRemovePhoto={onRemovePhoto}
+              onPhotoError={onPhotoError}
             />
           )
         ))}

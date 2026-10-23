@@ -71,7 +71,10 @@ export default function NoteCanvas({
   onChange,
   onInsertPhoto,
   photoUrls,
+  photoErrors,
   onOpenPhoto,
+  onRemovePhoto,
+  onPhotoError,
 }) {
   const { t } = useTranslation();
   const pageRef = useRef(null);
@@ -432,9 +435,12 @@ export default function NoteCanvas({
                 key={b.id}
                 value={b.text}
                 onChange={(text) => setText(b.id, text)}
-                onInsertPhoto={onInsertPhoto}
+                onInsertPhoto={onInsertPhoto ? () => onInsertPhoto(b.id) : undefined}
                 photoUrls={photoUrls}
+                photoErrors={photoErrors}
                 onOpenPhoto={onOpenPhoto}
+                onRemovePhoto={onRemovePhoto ? (assetId) => onRemovePhoto(assetId, b.id) : undefined}
+                onPhotoError={onPhotoError}
                 autoFocus={createdId === b.id}
                 onFocusChange={(has) => {
                   setTypingIn((cur) => {

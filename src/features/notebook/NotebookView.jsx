@@ -18,18 +18,20 @@
 //   * the note records the session id, so a debrief can list what was written
 //     during it (§3 rule 3).
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2 } from 'lucide-react';
+import { ImagePlus, Trash2, X } from 'lucide-react';
 import NotebookTree from './NotebookTree.jsx';
 import NoteCanvas from './NoteCanvas.jsx';
 import FormatBar from './FormatBar.jsx';
 import ShortcutSheet from './ShortcutSheet.jsx';
+import { BLOCK, parse, removePhotoReference } from './model.js';
 import { FormatSlotContext, useMediaQuery, WIDE } from './formatSlot.js';
 import { readLayout, writeLayout, isUnarranged } from './layout.js';
 import TimerPill from '../timer/TimerPill.jsx';
 import { readTimerSnapshot, subscribeTimer } from '../../lib/timerSnapshot.js';
 import { fmtTime, fmtDate, fmtDateFull, toLocalISO } from '../../lib/dates.js';
+import { notebookImages } from '../../lib/desktop.js';
 
 // "Edited 14:30" today, "Edited 3 Oct" this year, the full date before that.
 // The header used a bare `toLocaleString()`, seconds included, which read as a
@@ -85,6 +87,10 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
 
   const [timer, setTimer] = useState(() => readTimerSnapshot());
   useEffect(() => subscribeTimer(() => setTimer(readTimerSnapshot())), []);
+  const [photoImages, setPhotoImages] = useState({});
+  const [imageNotice, setImageNotice] = useState(null);
+  const [imageBusy, setImageBusy] = useState(false);
+  const [lightboxId, setLightboxId] = useState(null);
 
   // Set when the user explicitly opens another course while a session is
   // running. §3 rule 1: the scope is a default, not a lock, and this records
@@ -202,7 +208,6 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
     () => readLayout(active?.content ?? '', active?.layout ?? null),
     [active?.content, active?.layout],
   );
-
   const updateBoxes = useCallback((next) => {
     if (!active) return;
     const { content, layout } = writeLayout(next);
@@ -216,6 +221,165 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
       patch: { content, layout: isUnarranged(next) ? null : layout },
     });
   }, [active, dispatch]);
+  const boxesRef = useRef(boxes);
+  useEffect(() => { boxesRef.current = boxes; }, [boxes]);
+
+  const photoAssetIds = useMemo(
+    () => [...new Set(boxes.flatMap((box) => parse(box.text)
+      .filter((block) => block.type === BLOCK.PHOTO)
+      .map((block) => block.asset)))],
+    [boxes],
+  );
+  const photoAssetKey = photoAssetIds.join('|');
+
+  useEffect(() => {
+    const keep = new Set(photoAssetKey ? photoAssetKey.split('|') : []);
+    setPhotoImages((current) => {
+      const entries = Object.entries(current).filter(([id]) => keep.has(id));
+      return entries.length === Object.keys(current).length ? current : Object.fromEntries(entries);
+    });
+  }, [active?.id, photoAssetKey]);
+
+  useEffect(() => {
+    if (!notebookImages || !photoAssetKey) return undefined;
+    let cancelled = false;
+    const missing = photoAssetIds.filter((id) => !photoImages[id]);
+    if (missing.length === 0) return undefined;
+
+    Promise.all(missing.map(async (id) => {
+      try {
+        return [id, await notebookImages.read(id)];
+      } catch (error) {
+        return [id, { error: error?.message || String(error) }];
+      }
+    })).then((loaded) => {
+      if (cancelled) return;
+      setPhotoImages((current) => {
+        const next = { ...current };
+        for (const [id, image] of loaded) next[id] = image;
+        return next;
+      });
+    });
+    return () => { cancelled = true; };
+  }, [photoAssetKey, photoAssetIds, photoImages]);
+
+  const photoUrls = useMemo(
+    () => Object.fromEntries(Object.entries(photoImages)
+      .filter(([, image]) => image?.dataUrl)
+      .map(([id, image]) => [id, image.dataUrl])),
+    [photoImages],
+  );
+  const photoErrors = useMemo(
+    () => Object.fromEntries(Object.entries(photoImages)
+      .filter(([, image]) => image?.error)
+      .map(([id]) => [id, true])),
+    [photoImages],
+  );
+
+  const addImage = useCallback(async (boxId) => {
+    if (!active || !notebookImages || imageBusy) return;
+    setImageNotice(null);
+    setImageBusy(true);
+    try {
+      const imported = await notebookImages.import();
+      if (!imported) return;
+
+      const current = boxesRef.current;
+      const target = current.find((box) => box.id === boxId) || current[current.length - 1];
+      if (!target) throw new Error('notebook-page-unavailable');
+      const separator = target.text && !target.text.endsWith('\n') ? '\n' : '';
+      const next = current.map((box) => (
+        box.id === target.id
+          ? { ...box, text: `${box.text}${separator}![${imported.id}]` }
+          : box
+      ));
+      updateBoxes(next);
+
+      try {
+        const image = await notebookImages.read(imported.id);
+        setPhotoImages((currentImages) => ({ ...currentImages, [imported.id]: image }));
+        setImageNotice({ kind: 'success', message: t('nb.imageAdded') });
+      } catch (error) {
+        setPhotoImages((currentImages) => ({
+          ...currentImages,
+          [imported.id]: { error: error?.message || String(error) },
+        }));
+        setImageNotice({
+          kind: 'error',
+          message: t('nb.imagePreviewFailed', { msg: error?.message || String(error) }),
+        });
+      }
+    } catch (error) {
+      const code = error?.message || '';
+      const message = code === 'image-too-large'
+        ? t('nb.imageTooLarge')
+        : code === 'unsupported-image'
+          ? t('nb.imageUnsupported')
+          : t('nb.imageImportFailed', { msg: code || String(error) });
+      setImageNotice({ kind: 'error', message });
+    } finally {
+      setImageBusy(false);
+    }
+  }, [active, imageBusy, t, updateBoxes]);
+
+  const removeImage = useCallback(async (assetId, boxId) => {
+    if (!active) return;
+    const current = boxesRef.current;
+    const next = current.map((box) => {
+      if (box.id !== boxId) return box;
+      const result = removePhotoReference(box.text, assetId);
+      if (!result.removed) return box;
+      return { ...box, text: result.text };
+    });
+    if (next.every((box, index) => box === current[index])) return;
+    updateBoxes(next);
+    setImageNotice(null);
+
+    const stillReferenced = (state.notes || []).some((note) => (
+      note.id !== active.id && parse(note.content).some(
+        (block) => block.type === BLOCK.PHOTO && block.asset === assetId,
+      )
+    )) || next.some((box) => parse(box.text).some(
+      (block) => block.type === BLOCK.PHOTO && block.asset === assetId,
+    ));
+
+    if (!stillReferenced && notebookImages) {
+      try {
+        await notebookImages.delete(assetId);
+        setPhotoImages((currentImages) => {
+          const remaining = { ...currentImages };
+          delete remaining[assetId];
+          return remaining;
+        });
+        setImageNotice({ kind: 'success', message: t('nb.imageRemoved') });
+      } catch (error) {
+        setImageNotice({
+          kind: 'error',
+          message: t('nb.imageDeleteFailed', { msg: error?.message || String(error) }),
+        });
+      }
+    }
+  }, [active, state.notes, t, updateBoxes]);
+
+  const markImagePreviewFailed = useCallback((assetId) => {
+    setPhotoImages((currentImages) => ({
+      ...currentImages,
+      [assetId]: { error: 'image-decode-failed' },
+    }));
+    setImageNotice({
+      kind: 'error',
+      message: t('nb.imagePreviewFailed', { msg: t('nb.imageUnavailable') }),
+    });
+  }, [t]);
+
+  useEffect(() => {
+    if (!lightboxId) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setLightboxId(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [lightboxId]);
 
   useEffect(() => {
     if (stale && active) updateBoxes(boxes);
@@ -338,6 +502,19 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
             <span className="nb-head-meta">{t('nb.savedToSession')}</span>
           )}
           <span className="nb-head-spacer" />
+          {active && notebookImages && (
+            <button
+              type="button"
+              className="btn-outline btn-sm nb-add-image"
+              onClick={() => { void addImage(); }}
+              disabled={imageBusy}
+              aria-label={t('nb.addImage')}
+              title={t('nb.addImage')}
+            >
+              <ImagePlus size={14} strokeWidth={1.75} aria-hidden="true" />
+              <span>{imageBusy ? t('nb.addingImage') : t('nb.addImage')}</span>
+            </button>
+          )}
           {/* Desktop: the format controls share the header's line rather than
               taking a row of their own under it (StudyDesk#114). The editor
               holding the caret portals its live bar into the slot; until one
@@ -373,6 +550,12 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
               key={active.id}
               boxes={boxes}
               onChange={updateBoxes}
+              onInsertPhoto={notebookImages ? addImage : undefined}
+              onRemovePhoto={notebookImages ? removeImage : undefined}
+              onPhotoError={markImagePreviewFailed}
+              photoUrls={photoUrls}
+              photoErrors={photoErrors}
+              onOpenPhoto={setLightboxId}
             />
           </FormatSlotContext.Provider>
         ) : (
@@ -384,6 +567,38 @@ export default function NotebookView({ state, dispatch, onDeleteNote, onOpenTime
           </div>
         )}
         {helpOpen && <ShortcutSheet onClose={closeHelp} />}
+        {imageNotice && (
+          <div
+            className={`nb-image-notice is-${imageNotice.kind}`}
+            role={imageNotice.kind === 'error' ? 'alert' : 'status'}
+          >
+            {imageNotice.message}
+          </div>
+        )}
+        {lightboxId && photoUrls[lightboxId] && (
+          <div
+            className="nb-image-lightbox"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('nb.imagePreview')}
+            onClick={() => setLightboxId(null)}
+          >
+            <button
+              type="button"
+              className="nb-image-lightbox-close"
+              onClick={() => setLightboxId(null)}
+              aria-label={t('nb.closeImage')}
+              title={t('nb.closeImage')}
+            >
+              <X size={20} strokeWidth={1.75} aria-hidden="true" />
+            </button>
+            <img
+              src={photoUrls[lightboxId]}
+              alt={t('nb.imagePreview')}
+              onClick={(event) => event.stopPropagation()}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

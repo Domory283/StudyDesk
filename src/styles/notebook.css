@@ -304,21 +304,45 @@ button.nb-check[aria-checked='true']::after {
    ══════════════════════════════════════════════════════════════════════════ */
 
 .nb-photo {
+  position: relative;
   margin: 4px 0 8px;
   padding: 8px;
   border: 1px solid var(--nb-photo-border);
   background: var(--nb-page);
   display: inline-block;
   max-width: 100%;
-  cursor: zoom-in;
+  cursor: pointer;
 }
-.nb-photo img { display: block; max-width: 230px; width: 100%; height: auto; }
+.nb-photo img {
+  display: block;
+  max-width: min(100%, 460px);
+  max-height: 60vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
 .nb-photo-cap {
   margin-top: 6px;
   font-family: var(--nb-font-meta);
   font-size: 10px;
   color: var(--nb-ink-muted);
 }
+.nb-photo-remove {
+  position: absolute;
+  inset-block-start: 6px;
+  inset-inline-end: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--nb-photo-border);
+  background: var(--nb-page);
+  color: var(--nb-ink);
+  cursor: pointer;
+}
+.nb-photo-remove:hover,
+.nb-photo-remove:focus-visible { color: var(--nb-ink-muted); }
 /* Never re-tinted in dark modes. These are photographs of handwritten pages —
    dimming them makes them harder to read, which is the opposite of the point.
    Stated here as well as in modes.css because "dim the images" is a reflex. */
@@ -736,6 +760,54 @@ button.nb-check[aria-checked='true']::after {
    the first rule of the page. */
 .nb-head-meta { font-family: var(--nb-font-meta); font-size: 10px; color: var(--nb-ink-muted); white-space: nowrap; }
 .nb-head-spacer { flex: 1; }
+.nb-add-image { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
+
+.nb-image-notice {
+  position: fixed;
+  inset-inline-end: 16px;
+  inset-block-end: 16px;
+  z-index: 80;
+  max-width: min(460px, calc(100vw - 32px));
+  padding: 10px 14px;
+  border: 1px solid var(--nb-photo-border);
+  background: var(--nb-page);
+  color: var(--nb-ink);
+  font-family: var(--nb-font-meta);
+  font-size: 12px;
+  box-shadow: var(--shadow-md);
+}
+
+.nb-image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: var(--nb-page);
+  cursor: zoom-out;
+}
+.nb-image-lightbox img {
+  display: block;
+  max-width: min(100%, 1200px);
+  max-height: 92vh;
+  object-fit: contain;
+  cursor: default;
+}
+.nb-image-lightbox-close {
+  position: absolute;
+  inset-block-start: 12px;
+  inset-inline-end: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--nb-photo-border);
+  background: var(--nb-page);
+  color: var(--nb-ink);
+  cursor: pointer;
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    MOBILE FORMAT BAR  (§4) — docked, one row, 44px

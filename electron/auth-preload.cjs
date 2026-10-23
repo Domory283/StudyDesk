@@ -43,6 +43,9 @@ contextBridge.exposeInMainWorld('studydeskDesktop', {
   installUpdate: () => ipcRenderer.invoke('update:install'),
   // Open the release page the main process found. Takes no URL on purpose.
   openUpdate: () => ipcRenderer.invoke('update:open'),
+  importNotebookImage: () => ipcRenderer.invoke('notebook-image:import'),
+  readNotebookImage: (id) => ipcRenderer.invoke('notebook-image:read', id),
+  deleteNotebookImage: (id) => ipcRenderer.invoke('notebook-image:delete', id),
   // Progress and state changes pushed from the main process. Unsubscriber.
   onUpdateState: (fn) => {
     const handler = (_event, state) => fn(state);

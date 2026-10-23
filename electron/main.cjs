@@ -44,13 +44,18 @@
 // provide SPA-fallback routing, and `resolveRequest` below does that directly.
 'use strict';
 
-const { app, BrowserWindow, Menu, Tray, ipcMain, protocol, net, screen, shell } = require('electron');
+const { app, BrowserWindow, Menu, Tray, dialog, ipcMain, protocol, net, screen, shell } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const http = require('node:http');
 const { pathToFileURL } = require('node:url');
 const { setupUpdates } = require('./updater.cjs');
 const { createAuthState } = require('./authState.cjs');
+const {
+  deleteNotebookImage,
+  importNotebookImage,
+  readNotebookImage,
+} = require('./notebookImages.cjs');
 
 const DIST_DIR = path.join(__dirname, '..', 'dist');
 const ICON_PATH = path.join(__dirname, '..', 'resources', 'icon.ico');
@@ -511,6 +516,47 @@ function createTray() {
 
 ipcMain.on('widget:close', () => {
   if (widgetWindow && !widgetWindow.isDestroyed()) widgetWindow.close();
+});
+
+function isNotebookImageRequest(event) {
+  if (!mainWindow || mainWindow.isDestroyed() || event.sender !== mainWindow.webContents) return false;
+  if (event.senderFrame !== event.sender.mainFrame) return false;
+  try {
+    const url = new URL(event.senderFrame.url);
+    return url.protocol === `${SCHEME}:` && url.host === 'app';
+  } catch {
+    return false;
+  }
+}
+
+function requireNotebookImageRequest(event) {
+  if (!isNotebookImageRequest(event)) throw new Error('notebook-image-request-refused');
+}
+
+ipcMain.handle('notebook-image:import', async (event) => {
+  requireNotebookImageRequest(event);
+  if (!mainWindow || mainWindow.isDestroyed()) throw new Error('notebook-window-unavailable');
+
+  const selection = await dialog.showOpenDialog(mainWindow, {
+    title: 'Añadir imagen al cuaderno',
+    properties: ['openFile'],
+    filters: [
+      { name: 'Imágenes', extensions: ['png', 'jpg', 'jpeg', 'webp'] },
+      { name: 'Todos los archivos', extensions: ['*'] },
+    ],
+  });
+  if (selection.canceled || selection.filePaths.length === 0) return null;
+  return importNotebookImage(selection.filePaths[0], app.getPath('userData'));
+});
+
+ipcMain.handle('notebook-image:read', (event, id) => {
+  requireNotebookImageRequest(event);
+  return readNotebookImage(app.getPath('userData'), id);
+});
+
+ipcMain.handle('notebook-image:delete', (event, id) => {
+  requireNotebookImageRequest(event);
+  return deleteNotebookImage(app.getPath('userData'), id);
 });
 
 // Renderer asks for the provider URL to be opened in the real browser. This is

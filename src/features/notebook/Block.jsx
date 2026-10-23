@@ -9,6 +9,8 @@
 // that escaping-by-hand would be attempted and then got wrong.
 
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Trash2 } from 'lucide-react';
 import { BLOCK } from './model.js';
 import { renderInline, MARK } from './inline.js';
 import { parseMaths, isFlat } from './render/maths.js';
@@ -218,7 +220,19 @@ function Rich({ text }) {
 
 // ── The block ─────────────────────────────────────────────────────────────
 
-function BlockView({ block, index, number, onFocus, onToggleCheck, photoUrl, onOpenPhoto }) {
+function BlockView({
+  block,
+  index,
+  number,
+  onFocus,
+  onToggleCheck,
+  photoUrl,
+  photoError,
+  onOpenPhoto,
+  onRemovePhoto,
+  onPhotoError,
+}) {
+  const { t } = useTranslation();
   const common = {
     className: `nb-block nb-${block.type}`,
     'data-indent': block.indent || 0,
@@ -248,11 +262,34 @@ function BlockView({ block, index, number, onFocus, onToggleCheck, photoUrl, onO
   if (block.type === BLOCK.PHOTO) {
     return (
       <div className={`nb-block nb-photo-block`} data-indent="0">
-        <figure className="nb-photo" onClick={() => onOpenPhoto?.(block.asset)}>
+        <figure
+          className="nb-photo"
+          onClick={() => { if (photoUrl) onOpenPhoto?.(block.asset); }}
+        >
           {photoUrl
-            ? <img src={photoUrl} alt={block.text || ''} />
-            : <div className="nb-photo-cap">…</div>}
+            ? <img
+                src={photoUrl}
+                alt={block.text || ''}
+                onError={() => onPhotoError?.(block.asset)}
+              />
+            : <div className="nb-photo-cap">
+                {photoError ? t('nb.imageUnavailable') : t('nb.imageLoading')}
+              </div>}
           {block.text && <figcaption className="nb-photo-cap">{block.text}</figcaption>}
+          {onRemovePhoto && (
+            <button
+              type="button"
+              className="nb-photo-remove"
+              aria-label={t('nb.removeImage')}
+              title={t('nb.removeImage')}
+              onClick={(event) => {
+                event.stopPropagation();
+                onRemovePhoto(block.asset);
+              }}
+            >
+              <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
+            </button>
+          )}
         </figure>
       </div>
     );

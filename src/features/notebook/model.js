@@ -150,6 +150,19 @@ export function serialize(blocks) {
   return blocks.map(serializeBlock).join('\n');
 }
 
+/** Remove one matching photo block without changing any other note content. */
+export function removePhotoReference(source, assetId) {
+  let removed = false;
+  const blocks = parse(source).filter((block) => {
+    if (!removed && block.type === BLOCK.PHOTO && block.asset === assetId) {
+      removed = true;
+      return false;
+    }
+    return true;
+  });
+  return { text: serialize(blocks), removed };
+}
+
 /**
  * Display numbers for an ordered list.
  *
