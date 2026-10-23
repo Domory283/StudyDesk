@@ -730,7 +730,9 @@
       "difficultyLabel": "难度",
       "examNotesPh": "涵盖主题、形式、重点……",
       "addCourse": "添加课程",
-      "typeCustomPh": "填写类型（例如：演示）"
+      "typeCustomPh": "填写类型（例如：演示）",
+      "repeatUntil": "截止",
+      "examRepeatSummary": "共 {{count}} 场考试，最后一场在 {{until}}"
     },
     "act": {
       "addManually": "手动添加",
@@ -763,7 +765,8 @@
       "assignmentAdded": "作业已添加",
       "examAdded": "考试已添加",
       "logged": "已记录 {{n}} 分钟",
-      "queuedLegacy_other": "{{count}} 项旧待办等待同步"
+      "queuedLegacy_other": "{{count}} 项旧待办等待同步",
+      "examsAdded": "已添加 {{count}} 场考试"
     }
   },
   "widget": {

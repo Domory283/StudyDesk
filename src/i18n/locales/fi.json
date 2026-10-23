@@ -732,7 +732,9 @@
       "difficultyLabel": "Vaikeus",
       "examNotesPh": "Aiheet, muoto, mihin keskittyä...",
       "addCourse": "Lisää kurssi",
-      "typeCustomPh": "Nimeä tyyppi (esim. Esitys)"
+      "typeCustomPh": "Nimeä tyyppi (esim. Esitys)",
+      "repeatUntil": "Asti",
+      "examRepeatSummary": "{{count}} koetta, viimeinen {{until}}"
     },
     "act": {
       "addManually": "Lisää käsin",
@@ -766,7 +768,8 @@
       "examAdded": "Koe lisätty",
       "logged": "Kirjattu {{n}} min",
       "queuedLegacy_one": "{{count}} vanha tehtävälistan kohta odottaa synkronointia",
-      "queuedLegacy_other": "{{count}} vanhaa tehtävälistan kohtaa odottaa synkronointia"
+      "queuedLegacy_other": "{{count}} vanhaa tehtävälistan kohtaa odottaa synkronointia",
+      "examsAdded": "{{count}} koetta lisätty"
     }
   },
   "widget": {

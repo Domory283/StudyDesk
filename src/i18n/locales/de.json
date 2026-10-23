@@ -732,7 +732,9 @@
       "difficultyLabel": "Schwierigkeit",
       "examNotesPh": "Themen, Format, Schwerpunkte...",
       "addCourse": "Kurs hinzufügen",
-      "typeCustomPh": "Typ benennen (z. B. Präsentation)"
+      "typeCustomPh": "Typ benennen (z. B. Präsentation)",
+      "repeatUntil": "Bis",
+      "examRepeatSummary": "{{count}} Prüfungen, die letzte am {{until}}"
     },
     "act": {
       "addManually": "Manuell hinzufügen",
@@ -766,7 +768,8 @@
       "examAdded": "Prüfung hinzugefügt",
       "logged": "{{n}} Min erfasst",
       "queuedLegacy_one": "{{count}} älteres To-do wartet auf Synchronisierung",
-      "queuedLegacy_other": "{{count}} ältere To-dos warten auf Synchronisierung"
+      "queuedLegacy_other": "{{count}} ältere To-dos warten auf Synchronisierung",
+      "examsAdded": "{{count}} Prüfungen hinzugefügt"
     }
   },
   "widget": {

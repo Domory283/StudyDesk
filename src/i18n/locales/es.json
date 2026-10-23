@@ -739,7 +739,9 @@
       "difficultyLabel": "Dificultad",
       "examNotesPh": "Temas, formato, en qué centrarse...",
       "addCourse": "Añadir un curso",
-      "typeCustomPh": "Nombra el tipo (p. ej. Presentación)"
+      "typeCustomPh": "Nombra el tipo (p. ej. Presentación)",
+      "repeatUntil": "Hasta",
+      "examRepeatSummary": "{{count}} exámenes, el último el {{until}}"
     },
     "act": {
       "addManually": "Añadir manualmente",
@@ -774,7 +776,8 @@
       "logged": "Registrado {{n}} min",
       "queuedLegacy_one": "{{count}} pendiente antiguo esperando sincronización",
       "queuedLegacy_many": "{{count}} pendientes antiguos esperando sincronización",
-      "queuedLegacy_other": "{{count}} pendientes antiguos esperando sincronización"
+      "queuedLegacy_other": "{{count}} pendientes antiguos esperando sincronización",
+      "examsAdded": "{{count}} exámenes añadidos"
     }
   },
   "widget": {
