@@ -1071,7 +1071,7 @@ export default function App() {
       <div style={{display:"flex",gap:8}}><button className="btn" onClick={addCourse}>{t('av.chrome.addCourse')}</button><button className="btn-outline" onClick={()=>setShowAddCourse(false)}>{t('common.cancel')}</button></div>
     </div></div>}
     {showAddAsgn&&<AddAsgnModal courses={courses} activeCourse={state.activeCourse} onAdd={(data)=>{dispatch({type:"ADD_ASSIGNMENT",title:data.title,courseId:data.courseId,assignType:data.type,dueDate:data.dueDate,dueTime:data.dueTime,notes:data.notes});setShowAddAsgn(false);showFlash(t('av.flash.assignmentAdded'));}} onClose={()=>setShowAddAsgn(false)}/>}
-    {showAddExam&&<AddExamModal courses={courses} activeCourse={state.activeCourse} onAdd={(data)=>{dispatch({type:"ADD_EXAM",...data});setShowAddExam(false);showFlash(t('av.flash.examAdded'));}} onClose={()=>setShowAddExam(false)}/>}
+    {showAddExam&&<AddExamModal courses={courses} activeCourse={state.activeCourse} terms={state.academicTerms} onAdd={({dates,...data})=>{const ds=dates?.length?dates:[data.dueDate];for(const dueDate of ds)dispatch({type:"ADD_EXAM",...data,dueDate});setShowAddExam(false);showFlash(ds.length>1?t('av.flash.examsAdded',{count:ds.length}):t('av.flash.examAdded'));}} onClose={()=>setShowAddExam(false)}/>}
     {editingCourse&&<EditCourseModal
       course={state.courses[editingCourse.id] || editingCourse}
       courses={state.courses}

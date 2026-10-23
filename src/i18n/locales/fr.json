@@ -756,7 +756,9 @@
       "difficultyLabel": "Difficulté",
       "examNotesPh": "Sujets, format, points clés...",
       "addCourse": "Ajouter un cours",
-      "typeCustomPh": "Nommez le type (ex. Présentation)"
+      "typeCustomPh": "Nommez le type (ex. Présentation)",
+      "repeatUntil": "Jusqu'au",
+      "examRepeatSummary": "{{count}} examens, le dernier le {{until}}"
     },
     "act": {
       "addManually": "Ajouter manuellement",
@@ -791,7 +793,8 @@
       "logged": "Enregistré {{n}} min",
       "queuedLegacy_one": "{{count}} ancienne tâche en attente de synchronisation",
       "queuedLegacy_many": "{{count}} anciennes tâches en attente de synchronisation",
-      "queuedLegacy_other": "{{count}} anciennes tâches en attente de synchronisation"
+      "queuedLegacy_other": "{{count}} anciennes tâches en attente de synchronisation",
+      "examsAdded": "{{count}} examens ajoutés"
     }
   },
   "widget": {

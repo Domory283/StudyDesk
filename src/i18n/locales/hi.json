@@ -749,7 +749,9 @@
       "difficultyLabel": "कठिनाई",
       "examNotesPh": "शामिल विषय, प्रारूप, किस पर ध्यान देना है...",
       "addCourse": "विषय जोड़ें",
-      "typeCustomPh": "प्रकार का नाम दें (जैसे प्रस्तुति)"
+      "typeCustomPh": "प्रकार का नाम दें (जैसे प्रस्तुति)",
+      "repeatUntil": "तक",
+      "examRepeatSummary": "{{count}} परीक्षाएँ, आख़िरी {{until}} को"
     },
     "act": {
       "addManually": "मैन्युअल जोड़ें",
@@ -783,7 +785,8 @@
       "examAdded": "परीक्षा जोड़ी गई",
       "logged": "{{n}} मिनट दर्ज",
       "queuedLegacy_one": "{{count}} पुराना काम सिंक होने की प्रतीक्षा में",
-      "queuedLegacy_other": "{{count}} पुराने काम सिंक होने की प्रतीक्षा में"
+      "queuedLegacy_other": "{{count}} पुराने काम सिंक होने की प्रतीक्षा में",
+      "examsAdded": "{{count}} परीक्षाएँ जोड़ी गईं"
     }
   },
   "widget": {

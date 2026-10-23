@@ -781,7 +781,9 @@
       "difficultyLabel": "الصعوبة",
       "examNotesPh": "المواضيع المشمولة، الصيغة، وما ينبغي التركيز عليه...",
       "addCourse": "إضافة مادة",
-      "typeCustomPh": "سمِّ النوع (مثال: عرض تقديمي)"
+      "typeCustomPh": "سمِّ النوع (مثال: عرض تقديمي)",
+      "repeatUntil": "حتى",
+      "examRepeatSummary": "{{count}} اختبارات، آخرها في {{until}}"
     },
     "act": {
       "addManually": "إضافة يدوية",
@@ -819,7 +821,8 @@
       "queuedLegacy_two": "مهمتان قديمتان بانتظار المزامنة",
       "queuedLegacy_few": "{{count}} مهام قديمة بانتظار المزامنة",
       "queuedLegacy_many": "{{count}} مهمةً قديمةً بانتظار المزامنة",
-      "queuedLegacy_other": "{{count}} مهمة قديمة بانتظار المزامنة"
+      "queuedLegacy_other": "{{count}} مهمة قديمة بانتظار المزامنة",
+      "examsAdded": "تمت إضافة {{count}} اختبارات"
     }
   },
   "widget": {

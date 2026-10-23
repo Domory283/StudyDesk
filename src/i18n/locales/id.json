@@ -742,7 +742,9 @@
       "difficultyLabel": "Tingkat kesulitan",
       "examNotesPh": "Materi yang diujikan, format, hal yang perlu diperhatikan...",
       "addCourse": "Tambah mata pelajaran",
-      "typeCustomPh": "Beri nama jenisnya (mis. Presentasi)"
+      "typeCustomPh": "Beri nama jenisnya (mis. Presentasi)",
+      "repeatUntil": "Sampai",
+      "examRepeatSummary": "{{count}} ujian, yang terakhir {{until}}"
     },
     "act": {
       "addManually": "Tambah manual",
@@ -775,7 +777,8 @@
       "assignmentAdded": "Tugas ditambahkan",
       "examAdded": "Ujian ditambahkan",
       "logged": "{{n}} mnt tercatat",
-      "queuedLegacy_other": "{{count}} to-do lama menunggu disinkronkan"
+      "queuedLegacy_other": "{{count}} to-do lama menunggu disinkronkan",
+      "examsAdded": "{{count}} ujian ditambahkan"
     }
   },
   "widget": {

@@ -756,7 +756,9 @@
       "difficultyLabel": "Dificuldade",
       "examNotesPh": "Conteúdo, formato, no que focar...",
       "addCourse": "Adicionar disciplina",
-      "typeCustomPh": "Nomeie o tipo (ex.: Apresentação)"
+      "typeCustomPh": "Nomeie o tipo (ex.: Apresentação)",
+      "repeatUntil": "Até",
+      "examRepeatSummary": "{{count}} provas, a última em {{until}}"
     },
     "act": {
       "addManually": "Adicionar manualmente",
@@ -791,7 +793,8 @@
       "logged": "{{n}}min registrados",
       "queuedLegacy_one": "{{count}} tarefa antiga aguardando sincronização",
       "queuedLegacy_many": "{{count}} tarefas antigas aguardando sincronização",
-      "queuedLegacy_other": "{{count}} tarefas antigas aguardando sincronização"
+      "queuedLegacy_other": "{{count}} tarefas antigas aguardando sincronização",
+      "examsAdded": "{{count}} provas adicionadas"
     }
   },
   "widget": {
