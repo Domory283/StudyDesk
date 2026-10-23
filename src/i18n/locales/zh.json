@@ -260,7 +260,7 @@
     "scaleDirection": "哪一端更好",
     "scaleHighBest": "高",
     "scaleLowBest": "低",
-    "gradeNoteCustom": "你自定义的分数区间 —— 平均分按加权平均计算，与 IB 相同。仅保存在本设备，不会同步。以学校的官方计算方式为准。",
+    "gradeNoteCustom": "你自定义的分数区间 —— 平均分是你各项成绩的加权平均；当成绩单显示整数等级时，则是成绩单等级的加权平均。该区间随你的账户同步到你的其他设备和 Nexus。以学校的官方计算方式为准。",
     "support": "支持",
     "supportDev": "支持开发",
     "supportDevSub": "一个 Ko-fi 链接。应用中没有任何功能因此被锁定。",

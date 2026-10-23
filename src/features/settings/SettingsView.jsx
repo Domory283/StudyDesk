@@ -131,6 +131,11 @@ const css = `
    than fewer: dropping an option would be choosing for the user which lead
    times matter. */
 .sv2-mode.compact button{padding:6px 9px;letter-spacing:0.03em;}
+/* v1.19 (#178) — the report-card choices are sentences, not single words, and
+   on a phone they ran past the page edge in one line. This variant takes the
+   row's full width below its label and lets each option wrap. */
+.sv2-mode.wide{display:flex;flex:1 1 100%;max-width:100%;}
+.sv2-mode.wide button{flex:1 1 0;min-width:0;white-space:normal;line-height:1.35;padding:8px 10px;text-align:center;}
 .sv2-mode button{background:transparent;border:none;padding:6px 14px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;color:var(--muted);}
 .sv2-mode button.active{background:var(--text);color:var(--bg);}
 
@@ -1369,7 +1374,7 @@ export default function SettingsView({ state, dispatch, showFlash, session }) {
                 <>
                   <div className="sv2-scale-dir">
                     <span className="sv2-row-label">{t('settings.reportGrades')}</span>
-                    <span className="sv2-mode">
+                    <span className="sv2-mode wide">
                       <button
                         className={activeScale.report.enabled ? 'active' : ''}
                         onClick={() => setScale({ report: { ...activeScale.report, enabled: true } })}
@@ -1383,7 +1388,7 @@ export default function SettingsView({ state, dispatch, showFlash, session }) {
                   {activeScale.report.enabled && (
                     <div className="sv2-scale-dir">
                       <span className="sv2-row-label">{t('settings.reportMethod')}</span>
-                      <span className="sv2-mode">
+                      <span className="sv2-mode wide">
                         <button
                           className={activeScale.report.method === 'convertThenAverage' ? 'active' : ''}
                           onClick={() => setScale({ report: { ...activeScale.report, method: 'convertThenAverage' } })}

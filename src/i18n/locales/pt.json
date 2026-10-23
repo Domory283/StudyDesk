@@ -264,7 +264,7 @@
     "scaleDirection": "Qual extremo é o melhor",
     "scaleHighBest": "Alto",
     "scaleLowBest": "Baixo",
-    "gradeNoteCustom": "Sua própria escala numérica — a média é uma média ponderada, como no IB. Guardada apenas neste aparelho e não sincroniza. O cálculo oficial da sua instituição é sempre o que vale.",
+    "gradeNoteCustom": "Sua própria escala numérica — a média é uma média ponderada das suas notas, ou das notas do boletim quando o boletim mostra notas inteiras. A escala acompanha sua conta nos seus outros aparelhos e no Nexus. O cálculo oficial da sua instituição é sempre o que vale.",
     "support": "Apoio",
     "supportDev": "Apoiar o desenvolvimento",
     "supportDevSub": "Um link para o Ko-fi. Nada na app depende disso.",

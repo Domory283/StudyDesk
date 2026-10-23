@@ -264,7 +264,7 @@
     "scaleDirection": "Quelle extrémité est la meilleure",
     "scaleHighBest": "Haut",
     "scaleLowBest": "Bas",
-    "gradeNoteCustom": "Votre propre échelle numérique — la moyenne est une moyenne pondérée, comme en IB. Enregistrée sur cet appareil uniquement, sans synchronisation. Le calcul officiel de votre établissement fait toujours foi.",
+    "gradeNoteCustom": "Votre propre échelle numérique — la moyenne est une moyenne pondérée de vos notes, ou des notes de bulletin quand le bulletin affiche des notes entières. L'échelle suit votre compte sur vos autres appareils et dans Nexus. Le calcul officiel de votre établissement fait toujours foi.",
     "support": "Soutien",
     "supportDev": "Soutenir le développement",
     "supportDevSub": "Un lien vers Ko-fi. Rien dans l’app n’en dépend.",
