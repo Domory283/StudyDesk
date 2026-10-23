@@ -31,7 +31,6 @@ import { reconcileUnsynced } from "./lib/reconcile.js";
 import { stampsFromPull, shouldPull } from "./lib/syncStamps.js";
 import SaveSessionSheet from "./features/sessions/SaveSessionSheet.jsx";
 import { pastSessionDraft } from "./lib/pastSession.js";
-import PlanStartSheet from "./features/timer/PlanStartSheet.jsx";
 import { isOpenPlan, nextPlanStartAt, planSaveSteps, planToOffer } from "./lib/planRun.js";
 import { timerPlanId } from "./lib/timerSnapshot.js";
 import "./styles/notebook.css";
@@ -81,6 +80,8 @@ const GradesView = lazy(() => import("./features/grades/GradesView.jsx"));
 const SessionsView = lazy(() => import("./features/sessions/SessionsView.jsx"));
 const NotebookView = lazy(() => import("./features/notebook/NotebookView.jsx"));
 const TimerView = lazy(() => import("./features/timer/TimerView.jsx"));
+// v1.19 (#185) — only rendered when a block is offered, so not at launch.
+const PlanStartSheet = lazy(() => import("./features/timer/PlanStartSheet.jsx"));
 const StatsView = lazy(() => import("./features/stats/StatsView.jsx"));
 const CalendarView = lazy(() => import("./features/calendar/CalendarView.jsx"));
 const AnalyticsView = lazy(() => import("./features/analytics/AnalyticsView.jsx"));
@@ -1077,14 +1078,14 @@ export default function App() {
       }}
       onClose={()=>setEditingCourse(null)}/>}
     {offerPlan && isOpenPlan(offerPlan) && (
-      <PlanStartSheet
+      <Suspense fallback={null}><PlanStartSheet
         plan={offerPlan}
         course={offerPlan.subjectId ? state.courses[offerPlan.subjectId] : null}
         onStart={startPlanRun}
         onSnooze={snoozePlanOffer}
         onSkip={skipPlanOffer}
         onClose={closePlanOffer}
-      />
+      /></Suspense>
     )}
     {pendingSession && (
       <SaveSessionSheet
